@@ -50,23 +50,21 @@ def feedback(transaction: Transaction):
 #    else:
 #        raise HTTPException(status_code=404, detail="Modello non trovato")
 
+from fastapi.responses import FileResponse
+
 @app.get("/download/model")
 def download_model():
-    """Endpoint per scaricare il modello allenato, con debug."""
+    """Forza il download del modello"""
     if os.path.exists(MODEL_PATH):
-        file_size = os.path.getsize(MODEL_PATH)  # Otteniamo la dimensione del file
-        return {
-            "status": "ok",
-            "message": "Modello trovato",
-            "file_path": MODEL_PATH,
-            "file_size": file_size
-        }
+        return FileResponse(
+            path=MODEL_PATH,
+            filename="modello_sgd.pkl",
+            media_type="application/octet-stream",
+            headers={"Content-Disposition": "attachment; filename=modello_sgd.pkl"}
+        )
     else:
-        return {
-            "status": "error",
-            "message": "Modello non trovato",
-            "file_path": MODEL_PATH
-        }
+        raise HTTPException(status_code=404, detail="Modello non trovato")
+
 
 
 @app.get("/download/vectorizer")

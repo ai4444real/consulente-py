@@ -87,10 +87,16 @@ SGD_MODEL_URL = "https://zulsyfmxuczxfkygphkb.supabase.co/storage/v1/object/publ
 VECTORIZER_URL = "https://zulsyfmxuczxfkygphkb.supabase.co/storage/v1/object/public/models//vectorizer_sgd.pkl"
 
 # Scarica i file da Supabase
+import os
+
 def download_file(url, filename):
-    response = requests.get(url)
-    with open(filename, "wb") as f:
-        f.write(response.content)
+    if not os.path.exists(filename):  # Scarica solo se il file non esiste
+        response = requests.get(url)
+        with open(filename, "wb") as f:
+            f.write(response.content)
+        print(f"✅ Scaricato {filename} da Supabase.")
+    else:
+        print(f"⚠️ {filename} già presente, uso quello locale.")
 
 download_file(SGD_MODEL_URL, "modello_sgd.pkl")
 download_file(VECTORIZER_URL, "vectorizer_sgd.pkl")

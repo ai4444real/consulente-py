@@ -1,0 +1,11 @@
+questo programma usa python
+per attivare l'ambiente virtuale di python bisogna prima fare
+venv\Scripts\activate
+
+richiesta curl per testare il server
+
+curl -X 'POST' 'http://127.0.0.1:8000/predict' -H 'Content-Type: application/json' -d '{"description": "Pagamento bolletta", "amount": -100.0}'
+
+curl -X POST "http://127.0.0.1:8000/predict" -H "Content-Type: application/json" -d "{\"description\": \"ACCREDITO MITTENTE: TIDONE LUCA VIA ALLA PROVINCIALE 3 22018 PORLEZZA (CO) COMUNICAZIONI: SUPERVISIONE/COACHING 4 SESSIONI RIFERIMENTI: NOTPROVIDED 71000246568907OS 241231CH0CPXLFEV\", \"amount\": 499}"
+
+

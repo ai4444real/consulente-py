@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import pickle
 import joblib
 import os
 import requests
@@ -26,6 +26,14 @@ def load_model():
 model = load_model()
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Consenti richieste da qualsiasi origine
+    allow_credentials=True,
+    allow_methods=["*"],  # Consenti tutti i metodi (GET, POST, ecc.)
+    allow_headers=["*"],  # Consenti tutti gli headers
+)
 
 class Transaction(BaseModel):
     description: str

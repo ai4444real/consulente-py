@@ -14,3 +14,5 @@ attraverso github (ai4444real@gmail.com) pubblica su render.com
 
 interfaccia web git pages
 https://ai4444real.github.io/consulente-py/
+
+supabase login, attraverso github

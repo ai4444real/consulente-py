@@ -1,5 +1,5 @@
 # Percorsi locali
-SGD_MODEL_PATH = "ml_model/modello_sgd.pkl"
+MODEL_PATH = "ml_model/modello_sgd.pkl"
 VECTORIZER_PATH = "ml_model/vectorizer_sgd.pkl"
 
 # URL su Supabase (puoi sostituirli con i veri URL)

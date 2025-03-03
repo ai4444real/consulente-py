@@ -1,7 +1,7 @@
 import joblib
 import os
 import requests
-from ml_model.config import SGD_MODEL_PATH, VECTORIZER_PATH, SGD_MODEL_URL, VECTORIZER_URL
+from ml_model.config import MODEL_PATH, VECTORIZER_PATH, SGD_MODEL_URL, VECTORIZER_URL
 
 def download_file(url, filename):
     """Scarica un file da un URL solo se non è già presente localmente."""
@@ -14,10 +14,10 @@ def download_file(url, filename):
         print(f"⚠️ {filename} già presente, uso quello locale.")
 
 # Scarichiamo e carichiamo il modello
-download_file(SGD_MODEL_URL, SGD_MODEL_PATH)
+download_file(SGD_MODEL_URL, MODEL_PATH)
 download_file(VECTORIZER_URL, VECTORIZER_PATH)
 
-sgd_model = joblib.load(SGD_MODEL_PATH)
+sgd_model = joblib.load(MODEL_PATH)
 vectorizer_sgd = joblib.load(VECTORIZER_PATH)
 
 def predict(description):
@@ -29,4 +29,4 @@ def update_model(description, correct_account):
     """Aggiorna il modello con un nuovo esempio."""
     features = vectorizer_sgd.transform([description])
     sgd_model.partial_fit(features, [correct_account])  # Usa solo le classi pre-addestrate
-    joblib.dump(sgd_model, SGD_MODEL_PATH)
+    joblib.dump(sgd_model, MODEL_PATH)

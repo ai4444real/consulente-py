@@ -93,3 +93,6 @@ con -1800
 
 test
 pytest test_main.py
+
+transazione per provare se il modello "impara" dal feedback
+prova per vedere se il modello integra i feedback

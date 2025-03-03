@@ -1,51 +1,45 @@
 from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import joblib
-import os
 import requests
 
-MODEL_URL = "https://zulsyfmxuczxfkygphkb.supabase.co/storage/v1/object/public/models/modello_ai.pkl"
-MODEL_PATH = "modello_ai.pkl"
+# URL dei file su Supabase (SOSTITUISCI con gli URL reali)
+SGD_MODEL_URL = "https://zulsyfmxuczxfkygphkb.supabase.co/storage/v1/object/public/models//modello_sgd.pkl"
+VECTORIZER_URL = "https://zulsyfmxuczxfkygphkb.supabase.co/storage/v1/object/public/models//vectorizer_sgd.pkl"
 
-# Scarica il modello AI da Supabase se non esiste
-def download_model():
-    if not os.path.exists(MODEL_PATH):
-        print("Scaricando il modello AI...")
-        response = requests.get(MODEL_URL)
-        with open(MODEL_PATH, "wb") as f:
-            f.write(response.content)
-        print("✅ Modello scaricato!")
+# Scarica i file da Supabase
+def download_file(url, filename):
+    response = requests.get(url)
+    with open(filename, "wb") as f:
+        f.write(response.content)
 
-download_model()
+download_file(SGD_MODEL_URL, "modello_sgd.pkl")
+download_file(VECTORIZER_URL, "vectorizer_sgd.pkl")
 
-# Carica il modello AI
-def load_model():
-    return joblib.load(MODEL_PATH)
+# Carichiamo il modello e il vectorizer
+sgd_model = joblib.load("modello_sgd.pkl")
+vectorizer_sgd = joblib.load("vectorizer_sgd.pkl")
 
-model = load_model()
+print("✅ Modello SGDClassifier caricato con successo!")
 
+# Inizializziamo FastAPI
 app = FastAPI()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Consenti richieste da qualsiasi origine
-    allow_credentials=True,
-    allow_methods=["*"],  # Consenti tutti i metodi (GET, POST, ecc.)
-    allow_headers=["*"],  # Consenti tutti gli headers
-)
-
+# Definizione della struttura dei dati in ingresso
 class Transaction(BaseModel):
     description: str
     amount: float
 
+# Endpoint per predire il conto contabile
 @app.post("/predict")
 def predict(transaction: Transaction):
     try:
-        # Convertiamo i dati in un formato che il modello può usare
-        features = [transaction.description] 
-        predicted_account = model.predict(features)[0]
-        
+        # Convertiamo la descrizione in numeri con il vectorizer
+        features = vectorizer_sgd.transform([transaction.description])
+
+        # Prediciamo il conto contabile
+        predicted_account = sgd_model.predict(features)[0]
+
         return {
             "description": transaction.description,
             "amount": transaction.amount,
@@ -54,6 +48,7 @@ def predict(transaction: Transaction):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+# Endpoint di test
+@app.get("/")
+def home():
+    return {"message": "API di Predizione Contabile attiva con SGDClassifier"}

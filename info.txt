@@ -22,7 +22,7 @@ curl -X POST "https://consulente-py.onrender.com/feedback" -H "Content-Type: app
 
 test per download modello
 
-curl -X GET "https://consulente-py.onrender.com/download/model"
+curl -O "https://consulente-py.onrender.com/download/model"
 
 
 attraverso github (ai4444real@gmail.com) pubblica su render.com

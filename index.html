@@ -101,8 +101,8 @@
             <button onclick="sendFeedback()">Correggi</button>
         </div>
     </div>
-
     <script>
+
         const accountDescriptions = {
             "1000": "Cassa ",
             "1001": "Cassa Euro",
@@ -181,6 +181,20 @@
             "8900": "Imposte"
         };
 
+        // Funzione per popolare il <select>
+        function populateSelect() {
+            const selectElement = document.getElementById('correct-account');
+            for (const [key, description] of Object.entries(accountDescriptions)) {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = `${key} - ${description}`;
+                selectElement.appendChild(option);
+            }
+        }
+
+        // Carica i dati all'avvio
+        populateSelect();
+
         async function predict() {
             const description = document.getElementById("description").value;
             const amount = parseFloat(document.getElementById("amount").value);
@@ -199,12 +213,10 @@
             const accountDesc = accountDescriptions[data.predictedAccount] || "-";
             document.getElementById("result").innerHTML = `Conto Predetto: <strong>${data.predictedAccount}</strong> - ${accountDesc}`;
 
-            // Mostra il bottone "Feedback"
             document.getElementById("feedback-btn").style.display = "block";
         }
 
         function showCorrection() {
-            // Mostra il div di correzione
             document.getElementById("correction-div").style.display = "block";
         }
 

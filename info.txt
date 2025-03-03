@@ -87,3 +87,6 @@ C:SALES - ENZO 7X
 con -1800
 -> sbaglia
 
+
+test
+pytest test_main.py

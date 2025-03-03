@@ -1,7 +1,19 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
 import joblib
 import requests
+
+app = FastAPI()
+
+# Abilitiamo i CORS per consentire richieste dall'interfaccia web
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Puoi restringere ai tuoi domini se necessario
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # URL dei file su Supabase (SOSTITUISCI con gli URL reali)
 SGD_MODEL_URL = "https://zulsyfmxuczxfkygphkb.supabase.co/storage/v1/object/public/models//modello_sgd.pkl"

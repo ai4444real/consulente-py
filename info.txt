@@ -8,4 +8,9 @@ curl -X 'POST' 'http://127.0.0.1:8000/predict' -H 'Content-Type: application/jso
 
 curl -X POST "http://127.0.0.1:8000/predict" -H "Content-Type: application/json" -d "{\"description\": \"ACCREDITO MITTENTE: TIDONE LUCA VIA ALLA PROVINCIALE 3 22018 PORLEZZA (CO) COMUNICAZIONI: SUPERVISIONE/COACHING 4 SESSIONI RIFERIMENTI: NOTPROVIDED 71000246568907OS 241231CH0CPXLFEV\", \"amount\": 499}"
 
+curl -X POST "https://consulente-py.onrender.com/predict" -H "Content-Type: application/json" -d "{\"description\": \"ACCREDITO MITTENTE: TIDONE LUCA VIA ALLA PROVINCIALE 3 22018 PORLEZZA (CO) COMUNICAZIONI: SUPERVISIONE/COACHING 4 SESSIONI RIFERIMENTI: NOTPROVIDED 71000246568907OS 241231CH0CPXLFEV\", \"amount\": 499}"
 
+attraverso github (ai4444real@gmail.com) pubblica su render.com
+
+interfaccia web git pages
+https://ai4444real.github.io/consulente-py/

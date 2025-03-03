@@ -5,22 +5,82 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Predizione Conto Contabile</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; text-align: center; }
-        input, button { margin: 10px; padding: 8px; width: 80%; }
-        #result { font-weight: bold; margin-top: 20px; }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #003366; /* Blu scuro */
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            background: #006600; /* Verde */
+            color: white;
+            border: none;
+            padding: 10px;
+            margin-top: 15px;
+            width: 100%;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #004d00;
+        }
+
+        #result {
+            font-weight: bold;
+            margin-top: 20px;
+            color: #003366;
+        }
     </style>
 </head>
 <body>
-    <h2>Predizione Conto Contabile</h2>
-    <label for="description">Descrizione:</label>
-    <input type="text" id="description" placeholder="Inserisci descrizione"><br>
-    
-    <label for="amount">Importo:</label>
-    <input type="number" id="amount" placeholder="Inserisci importo"><br>
-    
-    <button onclick="predict()">Predici Conto</button>
-    
-    <div id="result"></div>
+    <div class="container">
+        <h2>Predizione Conto Contabile</h2>
+        <label for="description">Descrizione:</label>
+        <input type="text" id="description" placeholder="Inserisci descrizione">
+        
+        <label for="amount">Importo:</label>
+        <input type="number" id="amount" placeholder="Inserisci importo">
+        
+        <button onclick="predict()">Predici Conto</button>
+        
+        <div id="result"></div>
+    </div>
 
     <script>
         async function predict() {

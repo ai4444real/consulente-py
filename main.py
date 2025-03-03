@@ -4,17 +4,6 @@ from fastapi.middleware.cors import CORSMiddleware
 import joblib
 import requests
 
-app = FastAPI()
-
-# Abilitiamo i CORS per consentire richieste dall'interfaccia web
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Puoi restringere ai tuoi domini se necessario
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 # URL dei file su Supabase (SOSTITUISCI con gli URL reali)
 SGD_MODEL_URL = "https://zulsyfmxuczxfkygphkb.supabase.co/storage/v1/object/public/models//modello_sgd.pkl"
 VECTORIZER_URL = "https://zulsyfmxuczxfkygphkb.supabase.co/storage/v1/object/public/models//vectorizer_sgd.pkl"
@@ -36,6 +25,15 @@ print("✅ Modello SGDClassifier caricato con successo!")
 
 # Inizializziamo FastAPI
 app = FastAPI()
+
+# Abilitiamo i CORS per consentire richieste dall'interfaccia web
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Puoi restringere ai tuoi domini se necessario
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Definizione della struttura dei dati in ingresso
 class Transaction(BaseModel):

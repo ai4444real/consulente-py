@@ -42,13 +42,32 @@ def feedback(transaction: Transaction):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+#@app.get("/download/model")
+#def download_model():
+#    """Endpoint per scaricare il modello allenato."""
+#    if os.path.exists(MODEL_PATH):
+#        return FileResponse(MODEL_PATH, filename="modello_sgd.pkl", media_type="application/octet-stream")
+#    else:
+#        raise HTTPException(status_code=404, detail="Modello non trovato")
+
 @app.get("/download/model")
 def download_model():
-    """Endpoint per scaricare il modello allenato."""
+    """Endpoint per scaricare il modello allenato, con debug."""
     if os.path.exists(MODEL_PATH):
-        return FileResponse(MODEL_PATH, filename="modello_sgd.pkl", media_type="application/octet-stream")
+        file_size = os.path.getsize(MODEL_PATH)  # Otteniamo la dimensione del file
+        return {
+            "status": "ok",
+            "message": "Modello trovato",
+            "file_path": MODEL_PATH,
+            "file_size": file_size
+        }
     else:
-        raise HTTPException(status_code=404, detail="Modello non trovato")
+        return {
+            "status": "error",
+            "message": "Modello non trovato",
+            "file_path": MODEL_PATH
+        }
+
 
 @app.get("/download/vectorizer")
 def download_vectorizer():

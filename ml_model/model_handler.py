@@ -1,7 +1,7 @@
 import joblib
 import os
 import requests
-from ml_model.config import MODEL_PATH, VECTORIZER_PATH, SGD_MODEL_URL, VECTORIZER_URL
+from ml_model.config import MODEL_PATH, VECTORIZER_PATH, MODEL_URL, VECTORIZER_URL
 
 def download_file(url, filename):
     """Scarica un file da un URL solo se non è già presente localmente."""
@@ -14,7 +14,7 @@ def download_file(url, filename):
         print(f"⚠️ {filename} già presente, uso quello locale.")
 
 # Scarichiamo e carichiamo il modello
-download_file(SGD_MODEL_URL, MODEL_PATH)
+download_file(MODEL_URL, MODEL_PATH)
 download_file(VECTORIZER_URL, VECTORIZER_PATH)
 
 sgd_model = joblib.load(MODEL_PATH)

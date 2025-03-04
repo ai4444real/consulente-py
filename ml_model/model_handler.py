@@ -1,5 +1,6 @@
 import joblib
 import os
+import datetime
 import requests
 from ml_model.config import MODEL_PATH, VECTORIZER_PATH, MODEL_URL, VECTORIZER_URL
 
@@ -9,9 +10,15 @@ def download_file(url, filename):
         response = requests.get(url)
         with open(filename, "wb") as f:
             f.write(response.content)
-        print(f"✅ Scaricato {filename}")
+        file_size = os.path.getsize(filename)  # Ottieni la dimensione in byte
+        last_modified = datetime.datetime.fromtimestamp(os.path.getmtime(filename)).strftime('%Y-%m-%d %H:%M:%S')
+        
+        print(f"✅ Scaricato {filename} ({file_size} bytes, ultima modifica: {last_modified})")
     else:
-        print(f"⚠️ {filename} già presente, uso quello locale.")
+        file_size = os.path.getsize(filename)  # Ottieni la dimensione in byte
+        last_modified = datetime.datetime.fromtimestamp(os.path.getmtime(filename)).strftime('%Y-%m-%d %H:%M:%S')
+        
+        print(f"⚠️ {filename} già presente ({file_size} bytes, ultima modifica: {last_modified}), uso quello locale.")
 
 # Scarichiamo e carichiamo il modello
 download_file(MODEL_URL, MODEL_PATH)

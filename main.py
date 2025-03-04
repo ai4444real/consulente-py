@@ -103,3 +103,16 @@ def download_vectorizer():
 @app.get("/")
 def home():
     return {"message": "API di Predizione Contabile attiva con SGDClassifier"}
+
+@app.get("/download/corrections")
+def download_corrections():
+    """Permette di scaricare il file delle correzioni."""
+    if os.path.exists(CORRECTIONS_FILE):
+        return FileResponse(
+            path=CORRECTIONS_FILE,
+            filename="correzioni.json",
+            media_type="application/json",
+            headers={"Content-Disposition": "attachment; filename=correzioni.json"}
+        )
+    else:
+        raise HTTPException(status_code=404, detail="Il file correzioni.json non esiste")

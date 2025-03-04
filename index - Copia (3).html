@@ -351,19 +351,10 @@
                 tableHeader.innerHTML = "";
                 tableBody.innerHTML = "";
 
-                // Prendiamo le intestazioni originali e rimuoviamo le colonne inutili
+                // Prendiamo le intestazioni originali e puliamo le colonne
                 const originalHeaders = lines[0].split(separator).map(header => header.trim());
-                let newHeaders = originalHeaders.filter(header =>
-                    !["credit in chf", "debit in chf", "balance in chf", "value"].includes(header.toLowerCase())
-                );
-
-                // Assicuriamoci che "chf" sia sempre presente
-                if (!newHeaders.includes("chf")) {
-                    newHeaders.push("chf");
-                }
-
-                // Aggiungiamo la colonna "Predizione" alla fine
-                newHeaders.push("Predizione");
+                let newHeaders = originalHeaders.filter(header => !["debit in chf", "credit in chf", "balance in chf", "value"].includes(header.toLowerCase()));
+                newHeaders.push("chf");
 
                 // Creiamo la riga di intestazione
                 newHeaders.forEach(header => {
@@ -372,7 +363,7 @@
                     tableHeader.appendChild(th);
                 });
 
-                // Creiamo le righe con i dati
+                // Creiamo le righe pulite
                 for (let i = 1; i < lines.length; i++) {
                     const row = lines[i].split(separator).map(cell => cell.trim());
                     if (row.length !== originalHeaders.length) continue;
@@ -382,15 +373,8 @@
 
                     newHeaders.forEach(header => {
                         const td = document.createElement("td");
-
-                        if (header === "Predizione") {
-                            td.textContent = "⏳"; // Indicatore di attesa
-                            tr.appendChild(td);
-                            fetchPrediction(cleanedRow, td);
-                        } else {
-                            td.textContent = cleanedRow[header] !== undefined ? cleanedRow[header] : "";
-                            tr.appendChild(td);
-                        }
+                        td.textContent = cleanedRow[header] !== undefined ? cleanedRow[header] : "";
+                        tr.appendChild(td);
                     });
 
                     tableBody.appendChild(tr);
@@ -401,35 +385,6 @@
 
             reader.readAsText(file);
         }
-
-
-
-
-
-        function fetchPrediction(cleanedRow, predictionCell) {
-            if (!cleanedRow["Notification text"] || !cleanedRow["chf"]) {
-                predictionCell.textContent = "Errore";
-                return;
-            }
-
-            fetch("https://consulente-py.onrender.com/predict", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    description: cleanedRow["Notification text"],
-                    amount: parseFloat(cleanedRow["chf"])
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                predictionCell.textContent = data.predictedAccount || "N/A";
-            })
-            .catch(() => {
-                predictionCell.textContent = "Errore";
-            });
-        }
-
-
 
 
         function populateSelect() {

@@ -45,37 +45,6 @@
         #predicted-container, #feedback-container {
             margin-top: 20px;
         }
-
-        #csv-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        #csv-table th, #csv-table td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-
-        #csv-table th {
-            background-color: #28a745; /* Verde */
-            color: white;
-            font-weight: bold;
-        }
-
-        #csv-table td {
-            font-size: 14px;
-        }
-
-        /* Riduci la dimensione del testo nella colonna "notification text" senza troncarlo */
-        #csv-table td:nth-child(2) {
-            font-size: 12px;
-            white-space: normal; /* Permette di andare a capo */
-            word-wrap: break-word;
-        }
-
-
     </style>
 </head>
 <body>
@@ -84,9 +53,8 @@
         <!-- Schermata di ingresso -->
         <div id="welcome-screen">
             <h1>Benvenuto nel Consulente AI</h1>
-            <button onclick="showTestModel()">Testa Modello</button>
+            <button onclick="showTestModel()">Test Model</button>
             <button onclick="showDownload()">Scarica</button>
-            <button onclick="showBatchPrediction()">Predizione batch</button>
         </div>
 
         <!-- Schermata Test Model (inizialmente nascosta) -->
@@ -119,27 +87,13 @@
         <div id="download-screen" class="hidden">
             <h2>Scarica i modelli allenati</h2>
             <ul>
-                <a href="https://consulente-py.onrender.com/download/model" download="modello_sgd.pkl">
-                    Scarica il modello (modello_sgd.pkl)</a><br>
-                <a href="https://consulente-py.onrender.com/download/vectorizer" download="vectorizer_sgd.pkl">
-                    Scarica il vettorizzatore (vectorizer_sgd.pkl)</a><br>
-                <a href="https://consulente-py.onrender.com/download/corrections" download="correzioni.json">
-                    Scarica le correzioni (correzioni.json)</a>
+                <li><a href="https://consulente-py.onrender.com/download/model" download="modello_sgd.pkl">
+                    Scarica il modello (modello_sgd.pkl)</a></li>
+                <li><a href="https://consulente-py.onrender.com/download/vectorizer" download="vectorizer_sgd.pkl">
+                    Scarica il vettorizzatore (vectorizer_sgd.pkl)</a></li>
+                <li><a href="https://consulente-py.onrender.com/download/corrections" download="correzioni.json">
+                    Scarica le correzioni (correzioni.json)</a></li>
             </ul>
-            <button onclick="showWelcome()">Torna indietro</button>
-        </div>
-
-        <!-- Schermata Predizione batch (inizialmente nascosta) -->
-        <div id="batch-prediction-screen" class="hidden">
-            <h2>Batch Prediction</h2>
-            <input type="file" id="csv-file" accept=".csv">
-            <table id="csv-table" border="1" class="hidden">
-                <thead>
-                    <tr id="csv-header"></tr>
-                </thead>
-                <tbody id="csv-body"></tbody>
-            </table>            
-            <button onclick="loadCSV()">Load</button>
             <button onclick="showWelcome()">Torna indietro</button>
         </div>
 
@@ -237,17 +191,9 @@
             document.getElementById('download-screen').classList.remove('hidden');
         }
 
-        function showBatchPrediction() {
-            document.getElementById('welcome-screen').classList.add('hidden');
-            document.getElementById('test-model-screen').classList.add('hidden');
-            document.getElementById('download-screen').classList.add('hidden');
-            document.getElementById('batch-prediction-screen').classList.remove('hidden');
-        }
-
         function showWelcome() {
             document.getElementById('test-model-screen').classList.add('hidden');
             document.getElementById('download-screen').classList.add('hidden');
-            document.getElementById('batch-prediction-screen').classList.add('hidden');
             document.getElementById('welcome-screen').classList.remove('hidden');
         }
 
@@ -303,133 +249,6 @@
                 alert("Errore nella comunicazione con il server");
             });
         }
-
-
-        function cleanCSVRow(row, headers) {
-            let cleanedRow = {};
-            
-            headers.forEach((header, index) => {
-                let value = row[index]?.trim() || "";
-
-                if (header.toLowerCase() === "debit in chf" && value) {
-                    cleanedRow["chf"] = parseFloat(value.replace(",", "."));
-                } else if (header.toLowerCase() === "credit in chf" && value) {
-                    cleanedRow["chf"] = parseFloat(value.replace(",", "."));
-                } else if (header.toLowerCase() !== "value" && header.toLowerCase() !== "balance in chf" &&
-                        header.toLowerCase() !== "debit in chf" && header.toLowerCase() !== "credit in chf") {
-                    cleanedRow[header] = value;
-                }
-            });
-
-            return cleanedRow;
-        }
-
-
-        function loadCSV() {
-            const fileInput = document.getElementById('csv-file');
-            if (!fileInput.files.length) {
-                alert("Seleziona un file CSV!");
-                return;
-            }
-
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-
-            reader.onload = function(event) {
-                let content = event.target.result;
-                let separator = content.includes("\t") ? "\t" : content.includes(";") ? ";" : ",";
-
-                const lines = content.split("\n").map(line => line.trim()).filter(line => line !== "");
-
-                if (lines.length < 2) {
-                    alert("Il file CSV sembra vuoto o con un solo record!");
-                    return;
-                }
-
-                const tableHeader = document.getElementById('csv-header');
-                const tableBody = document.getElementById('csv-body');
-                tableHeader.innerHTML = "";
-                tableBody.innerHTML = "";
-
-                // Prendiamo le intestazioni originali e rimuoviamo le colonne inutili
-                const originalHeaders = lines[0].split(separator).map(header => header.trim());
-                let newHeaders = originalHeaders.filter(header =>
-                    !["credit in chf", "debit in chf", "balance in chf", "value"].includes(header.toLowerCase())
-                );
-
-                // Assicuriamoci che "chf" sia sempre presente
-                if (!newHeaders.includes("chf")) {
-                    newHeaders.push("chf");
-                }
-
-                // Aggiungiamo la colonna "Predizione" alla fine
-                newHeaders.push("Predizione");
-
-                // Creiamo la riga di intestazione
-                newHeaders.forEach(header => {
-                    const th = document.createElement("th");
-                    th.textContent = header;
-                    tableHeader.appendChild(th);
-                });
-
-                // Creiamo le righe con i dati
-                for (let i = 1; i < lines.length; i++) {
-                    const row = lines[i].split(separator).map(cell => cell.trim());
-                    if (row.length !== originalHeaders.length) continue;
-
-                    const cleanedRow = cleanCSVRow(row, originalHeaders);
-                    const tr = document.createElement("tr");
-
-                    newHeaders.forEach(header => {
-                        const td = document.createElement("td");
-
-                        if (header === "Predizione") {
-                            td.textContent = "⏳"; // Indicatore di attesa
-                            tr.appendChild(td);
-                            fetchPrediction(cleanedRow, td);
-                        } else {
-                            td.textContent = cleanedRow[header] !== undefined ? cleanedRow[header] : "";
-                            tr.appendChild(td);
-                        }
-                    });
-
-                    tableBody.appendChild(tr);
-                }
-
-                document.getElementById('csv-table').classList.remove('hidden');
-            };
-
-            reader.readAsText(file);
-        }
-
-
-
-
-
-        function fetchPrediction(cleanedRow, predictionCell) {
-            if (!cleanedRow["Notification text"] || !cleanedRow["chf"]) {
-                predictionCell.textContent = "Errore";
-                return;
-            }
-
-            fetch("https://consulente-py.onrender.com/predict", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    description: cleanedRow["Notification text"],
-                    amount: parseFloat(cleanedRow["chf"])
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                predictionCell.textContent = data.predictedAccount || "N/A";
-            })
-            .catch(() => {
-                predictionCell.textContent = "Errore";
-            });
-        }
-
-
 
 
         function populateSelect() {

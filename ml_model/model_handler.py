@@ -4,12 +4,15 @@ import datetime
 import requests
 from ml_model.config import MODEL_PATH, VECTORIZER_PATH, MODEL_URL, VECTORIZER_URL
 
+CORRECTIONS_FILE = "correzioni.json"
+
 def download_file(url, filename):
     """Scarica un file da un URL solo se non è già presente localmente."""
     if not os.path.exists(filename):
         response = requests.get(url)
         with open(filename, "wb") as f:
             f.write(response.content)
+
         file_size = os.path.getsize(filename)  # Ottieni la dimensione in byte
         last_modified = datetime.datetime.fromtimestamp(os.path.getmtime(filename)).strftime('%Y-%m-%d %H:%M:%S')
         

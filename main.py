@@ -5,7 +5,39 @@ from ml_model.model_handler import predict, update_model
 
 from fastapi.responses import FileResponse
 import os
+import datetime
+import json
 from ml_model.config import MODEL_PATH, VECTORIZER_PATH
+
+CORRECTIONS_FILE = "correzioni.json"
+
+def save_correction(description, amount, correct_account):
+    """Salva la correzione in un file JSON"""
+    correction = {
+        "Date": datetime.datetime.today().strftime("%Y-%m-%d") if datetime.datetime.today() else "1970-01-01",
+        "Description": description,
+        "Importo": amount,
+        "Target_Account": correct_account
+    }
+
+    try:
+        # Se il file esiste, leggiamo il contenuto e aggiungiamo la nuova correzione
+        if os.path.exists(CORRECTIONS_FILE):
+            with open(CORRECTIONS_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        else:
+            data = []
+
+        # Aggiungiamo la nuova correzione
+        data.append(correction)
+
+        # Salviamo di nuovo il file
+        with open(CORRECTIONS_FILE, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=4, ensure_ascii=False)
+
+        print(f"✅ Correzione salvata: {correction}")
+    except Exception as e:
+        print(f"❌ Errore nel salvataggio della correzione: {e}")
 
 app = FastAPI()
 
@@ -37,18 +69,11 @@ def predict_transaction(transaction: Transaction):
 @app.post("/feedback")
 def feedback(transaction: Transaction):
     try:
+        save_correction(transaction.description, transaction.amount, transaction.correctAccount)
         update_model(transaction.description, transaction.correctAccount)
         return {"message": "Correzione registrata con successo!"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-#@app.get("/download/model")
-#def download_model():
-#    """Endpoint per scaricare il modello allenato."""
-#    if os.path.exists(MODEL_PATH):
-#        return FileResponse(MODEL_PATH, filename="modello_sgd.pkl", media_type="application/octet-stream")
-#    else:
-#        raise HTTPException(status_code=404, detail="Modello non trovato")
 
 from fastapi.responses import FileResponse
 

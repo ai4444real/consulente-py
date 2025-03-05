@@ -14,19 +14,22 @@ CORRECTIONS_FILE = "correzioni.json"
 def save_correction(description, amount, correct_account):
     """Salva la correzione in un file JSON"""
     correction = {
-        "Date": datetime.datetime.today().strftime("%Y-%m-%d") if datetime.datetime.today() else "1970-01-01",
+        "Date": datetime.datetime.today().strftime("%Y-%m-%d"),
         "Description": description,
         "Importo": amount,
         "Target_Account": correct_account
     }
 
     try:
-        # Se il file esiste, leggiamo il contenuto e aggiungiamo la nuova correzione
+        # 🔍 Leggi il file prima della modifica
         if os.path.exists(CORRECTIONS_FILE):
             with open(CORRECTIONS_FILE, "r", encoding="utf-8") as f:
-                data = json.load(f)
+                initial_data = f.read()
+                print(f"📂 Contenuto iniziale di {CORRECTIONS_FILE}:\n{initial_data}")
+                data = json.loads(initial_data) if initial_data else []
         else:
             data = []
+            print(f"📂 Il file {CORRECTIONS_FILE} non esiste ancora, verrà creato.")
 
         # Aggiungiamo la nuova correzione
         data.append(correction)
@@ -35,14 +38,16 @@ def save_correction(description, amount, correct_account):
         with open(CORRECTIONS_FILE, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4, ensure_ascii=False)
 
-        # ✅ Stampa il contenuto del file dopo il salvataggio
+        # ✅ Stampa il contenuto dopo il salvataggio
         with open(CORRECTIONS_FILE, "r", encoding="utf-8") as f:
             saved_data = f.read()
-        
-            print(f"✅ Correzione salvata in '{CORRECTIONS_FILE}', numero di correzioni totali: {len(data)}")
-            print(f"📄 Contenuto attuale di {CORRECTIONS_FILE}:\n{saved_data}")
+
+        print(f"✅ Correzione salvata in '{CORRECTIONS_FILE}', numero di correzioni totali: {len(data)}")
+        print(f"📄 Contenuto attuale di {CORRECTIONS_FILE}:\n{saved_data}")
+
     except Exception as e:
         print(f"❌ Errore nel salvataggio della correzione: {e}")
+
 
 app = FastAPI()
 

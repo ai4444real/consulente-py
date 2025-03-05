@@ -79,7 +79,7 @@
         <div id="welcome-screen">
             <h1>Benvenuto nel Consulente AI</h1>
             <button onclick="showTestModel()">Testa Modello</button>
-            <button onclick="showDownload()">Scarica</button>
+            <button onclick="showDownload()">Operazioni</button>
             <button onclick="showBatchPrediction()">Predizione batch</button>
         </div>
 
@@ -111,7 +111,7 @@
 
         <!-- Schermata Download (inizialmente nascosta) -->
         <div id="download-screen" class="hidden">
-            <h2>Scarica i modelli allenati</h2>
+            <h2>Operazioni</h2>
             <ul>
                 <a href="https://consulente-py.onrender.com/download/model" download="modello_sgd.pkl">
                     Scarica il modello (modello_sgd.pkl)</a><br>
@@ -119,7 +119,9 @@
                     Scarica il vettorizzatore (vectorizer_sgd.pkl)</a><br>
                 <a href="https://consulente-py.onrender.com/download/corrections" download="correzioni.json">
                     Scarica le correzioni (correzioni.json)</a>
-            </ul>
+                <a href="https://consulente-py.onrender.com/force-download/models">
+                    Forza download dei modelli</a>
+                </ul>
             <button onclick="showWelcome()">Torna indietro</button>
         </div>
 

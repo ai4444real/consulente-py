@@ -35,9 +35,9 @@ def save_correction(description, amount, correct_account):
         with open(CORRECTIONS_FILE, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4, ensure_ascii=False)
 
-            # Conta il numero di righe nel file
-            num_lines = sum(1 for _ in open(CORRECTIONS_FILE, "r", encoding="utf-8"))
-            print(f"✅ Correzione salvata in '{CORRECTIONS_FILE}', numero di righe: {num_lines}")
+            # Conta il numero di correzioni salvate nel JSON
+            num_corrections = len(data)
+            print(f"✅ Correzione salvata in '{CORRECTIONS_FILE}', numero di correzioni totali: {num_corrections}")
 
     except Exception as e:
         print(f"❌ Errore nel salvataggio della correzione: {e}")

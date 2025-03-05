@@ -21,32 +21,26 @@ def save_correction(description, amount, correct_account):
     }
 
     try:
-        # 🔍 Leggi il file prima della modifica
+        # Legge il file se esiste, altrimenti inizializza una lista vuota
         if os.path.exists(CORRECTIONS_FILE):
             with open(CORRECTIONS_FILE, "r", encoding="utf-8") as f:
-                initial_data = f.read()
-                print(f"📂 Contenuto iniziale di {CORRECTIONS_FILE}:\n{initial_data}")
-                data = json.loads(initial_data) if initial_data else []
+                data = json.load(f) if f.read().strip() else []
         else:
             data = []
-            print(f"📂 Il file {CORRECTIONS_FILE} non esiste ancora, verrà creato.")
 
-        # Aggiungiamo la nuova correzione
+        # Aggiunge la nuova correzione
         data.append(correction)
 
-        # Salviamo di nuovo il file
+        # Salva il file aggiornato
         with open(CORRECTIONS_FILE, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4, ensure_ascii=False)
 
-        # ✅ Stampa il contenuto dopo il salvataggio
-        with open(CORRECTIONS_FILE, "r", encoding="utf-8") as f:
-            saved_data = f.read()
-
-        print(f"✅ Correzione salvata in '{CORRECTIONS_FILE}', numero di correzioni totali: {len(data)}")
-        print(f"📄 Contenuto attuale di {CORRECTIONS_FILE}:\n{saved_data}")
+        # Log minimale con il numero di correzioni totali
+        print(f"✅ Correzione salvata, totale correzioni: {len(data)}")
 
     except Exception as e:
         print(f"❌ Errore nel salvataggio della correzione: {e}")
+
 
 
 app = FastAPI()
@@ -118,12 +112,6 @@ def home():
 def download_corrections():
     """Permette di scaricare il file delle correzioni."""
     if os.path.exists(CORRECTIONS_FILE):
-        print(f"📂 FastAPI sta servendo il file: {os.path.abspath(CORRECTIONS_FILE)}")
-
-        with open(CORRECTIONS_FILE, "r", encoding="utf-8") as f:
-            content = f.read()
-        
-        print(f"📄 Contenuto del file servito:\n{content}")
 
         return FileResponse(
             path=CORRECTIONS_FILE,

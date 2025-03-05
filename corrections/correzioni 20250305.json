@@ -1,0 +1,20 @@
+[
+    {
+        "Date": "2025-03-05",
+        "Description": "GOOGLE PAY ACQUISTO/SERVIZIO DEL 31.01.2025 CARTA N° XXXX4074 ALDI SUISSE 69 MASSAGNO (CH)",
+        "Importo": -10.0,
+        "Target_Account": "6500"
+    },
+    {
+        "Date": "2025-03-05",
+        "Description": "GOOGLE PAY ACQUISTO/SERVIZIO DEL 31.01.2025 CARTA N° XXXX4074 POSTA CH SA (1459) BRE BREGANZONA (CH)",
+        "Importo": -7.5,
+        "Target_Account": "6552"
+    },
+    {
+        "Date": "2025-03-05",
+        "Description": "ADDEBITO CH2630000001690011691 AZIENDA ELETTRICA DI MASSAGNO (AEM) SA 6900 MASSAGNO RIFERIMENTO DEL MITTENTE: C:UFFICIO - CORRENTE 10-12.2024 20250127000800427019862",
+        "Importo": -133.8,
+        "Target_Account": "6400"
+    }
+]

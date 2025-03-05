@@ -118,9 +118,8 @@ def home():
 def download_corrections():
     """Permette di scaricare il file delle correzioni."""
     if os.path.exists(CORRECTIONS_FILE):
-        # 🔍 Verifica che stiamo servendo il file giusto
         print(f"📂 FastAPI sta servendo il file: {os.path.abspath(CORRECTIONS_FILE)}")
-        
+
         with open(CORRECTIONS_FILE, "r", encoding="utf-8") as f:
             content = f.read()
         
@@ -130,8 +129,14 @@ def download_corrections():
             path=CORRECTIONS_FILE,
             filename="correzioni.json",
             media_type="application/json",
-            headers={"Content-Disposition": "attachment; filename=correzioni.json"}
+            headers={
+                "Content-Disposition": "attachment; filename=correzioni.json",
+                "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+                "Pragma": "no-cache",
+                "Expires": "0"
+            }
         )
     else:
         raise HTTPException(status_code=404, detail="Il file correzioni.json non esiste")
+
 

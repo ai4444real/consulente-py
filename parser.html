@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Parser</title>
+</head>
+<body>
+    <h1>Carica un file CSV</h1>
+    <input type="file" id="fileInput" accept=".csv">
+    <br><br>
+    <label>Seleziona banca:</label>
+    <input type="radio" name="bank" id="postfinance" checked> PostFinance
+    <input type="radio" name="bank" id="raiffeisen"> Raiffeisen
+    <br><br>
+    <label for="config">Configurazione:</label>
+    <textarea id="config" rows="3" cols="50">;
+8;3
+D:dd.mm.yyyy;T;A;A;X;X</textarea>
+    <br><br>
+    <button id="reloadBtn">Ricarica CSV</button>
+    <br><br>
+    <table border="1" id="dataTable">
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Descrizione</th>
+                <th>Importo</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    
+    <script src="csvParser.js"></script>
+</body>
+</html>

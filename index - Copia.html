@@ -70,73 +70,6 @@
             gap: 10px;
             margin-bottom: 10px;
         }
-
-
-        .button-group {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 10px;
-        }
-
-        .button-group button {
-            padding: 8px 15px;
-            font-size: 14px;
-        }
-
-        /* Migliora la selezione del conto bancario */
-        .bank-select {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin: 10px 0;
-        }
-
-        .bank-select label {
-            font-weight: bold;
-        }
-
-        .batch-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 20px;
-            margin-bottom: 10px;
-        }
-
-        /* Colonna sinistra (radio, textarea, file input) */
-        .batch-left {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 10px;
-            width: 45%;
-        }
-
-        /* Textarea più stretta */
-        .config-textarea {
-            width: 100%;
-            min-width: 220px;
-            max-width: 100%;
-        }
-
-        /* Colonna destra (bottoni in verticale, più stretta) */
-        .batch-right {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 30%; /* Più stretta */
-            gap: 5px; /* Spazio ridotto tra i bottoni */
-        }
-
-        /* Bottoni più compatti */
-        .batch-right button {
-            width: 90%; /* Meno larghi */
-            padding: 8px; /* Più compatti */
-            font-size: 14px;
-        }
-
     </style>
 </head>
 <body>
@@ -197,43 +130,29 @@
         <!-- Schermata Predizione batch (inizialmente nascosta) -->
         <div id="batch-prediction-screen" class="hidden">
             <h1>Predizione batch</h1>
-        
-            <div class="batch-container">
-                <!-- Colonna sinistra -->
-                <div class="batch-left">
-                    <div class="radio-group">
-                        <label>Seleziona banca:</label>
-                        <input type="radio" name="bank" id="postfinance" checked> PostFinance
-                        <input type="radio" name="bank" id="raiffeisen"> Raiffeisen
-                    </div>
-                    <textarea id="config" rows="3" class="config-textarea">;
+            <div class="radio-group">
+                <label>Seleziona banca:</label>
+                <input type="radio" name="bank" id="postfinance" checked> PostFinance
+                <input type="radio" name="bank" id="raiffeisen"> Raiffeisen
+            </div>
+            <label for="config">Configurazione:</label>
+            <textarea id="config" rows="3" cols="50">;
 8;3
 D:dd.mm.yyyy;T;A;A;X;X
-                    </textarea>
-                    <input type="file" id="fileInput" accept=".csv">
-                </div>
-        
-                <!-- Colonna destra -->
-                <div class="batch-right">
-                    <button id="reloadBtn">🔄 Ricarica CSV</button>
-                    <button onclick="predictAccounts()">🔍 Predict Accounts</button>
-                    <button onclick="downloadForBanana()">🍌 Download</button>
-                    <button onclick="showWelcome()">🔙 Torna indietro</button>
-                </div>
-            </div>
-        
-            <!-- Selezione conto bancario -->
-            <div class="bank-select">
-                <label for="bankAccount">Conto bancario:</label>
-                <select id="bankAccount">
-                    <option value="1025" selected>PostFinance</option>
-                    <option value="1026">PostFinance Riserve</option>
-                    <option value="1023">Raiffeisen CHF</option>
-                    <option value="1021">Raiffeisen EUR</option>
-                </select>
-            </div>
-        
-            <!-- Tabella transazioni -->
+            </textarea>
+                <br>
+            <input type="file" id="fileInput" accept=".csv"><br>
+            <button id="reloadBtn">Ricarica CSV</button>
+            <button onclick="predictAccounts()">Predict Accounts</button>
+            <button onclick="downloadForBanana()">Download for 🍌</button>
+            <button onclick="showWelcome()">Torna indietro</button>
+            <label for="bankAccount">Conto bancario:</label>
+            <select id="bankAccount">
+                <option value="1025" selected>PostFinance</option>
+                <option value="1026">PostFinance Riserve</option>
+                <option value="1023">Raiffeisen CHF</option>
+                <option value="1021">Raiffeisen EUR</option>
+            </select>
             <table id="dataTable">
                 <thead>
                     <tr>

@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from ml_model.model_handler import predict, update_model, get_model_stats
+from ml_model.model_handler import predict, update_model, get_model_stats, reload_model
 
 from fastapi.responses import FileResponse
 import os
@@ -129,31 +129,9 @@ def download_corrections():
         raise HTTPException(status_code=404, detail="Il file correzioni.json non esiste")
 
 @app.get("/force-download/models")
-def force_download_models():
-    """Forza il download e la sovrascrittura del modello e del vectorizer"""
-    try:
-        # Scarica e sovrascrive il modello
-        model_response = requests.get(MODEL_URL)
-        if model_response.status_code == 200:
-            with open(MODEL_PATH, "wb") as f:
-                f.write(model_response.content)
-            print("✅ Modello aggiornato con successo.")
-        else:
-            raise HTTPException(status_code=500, detail=f"Errore nel download del modello: {model_response.status_code}")
-
-        # Scarica e sovrascrive il vettorizzatore
-        vectorizer_response = requests.get(VECTORIZER_URL)
-        if vectorizer_response.status_code == 200:
-            with open(VECTORIZER_PATH, "wb") as f:
-                f.write(vectorizer_response.content)
-            print("✅ Vettorizzatore aggiornato con successo.")
-        else:
-            raise HTTPException(status_code=500, detail=f"Errore nel download del vettorizzatore: {vectorizer_response.status_code}")
-
-        return {"message": "Modello e vectorizer aggiornati con successo"}
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+def force_reload_models():
+    """Forza il download e la ricarica del modello e del vectorizer"""
+    return reload_model()
 
 @app.get("/stats")
 def get_stats():

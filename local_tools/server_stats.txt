@@ -1,0 +1,14 @@
+📊 STATISTICHE SERVER
+
+🧠 Modello:
+ - Nome: modello_sgd.pkl
+ - Dimensione: 1859733 bytes
+ - Ultima modifica: 2025-03-06 11:39:58
+
+📚 Vettorizzatore:
+ - Nome: vectorizer_sgd.pkl
+ - Dimensione: 76315 bytes
+ - Ultima modifica: 2025-03-06 11:39:59
+
+📂 Correzioni:
+ - Numero totale di correzioni: 1

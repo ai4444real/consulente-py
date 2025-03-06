@@ -17,13 +17,14 @@ curl -X POST "https://consulente-py.onrender.com/predict" -H "Content-Type: appl
 correzione (locale)
 curl -X POST "http://127.0.0.1:8000/feedback" -H "Content-Type: application/json" -d "{\"description\": \"Pagamento bolletta\", \"amount\": -100.0, \"correctAccount\": \"5000\"}"
 
-correzine (server)
+correzione (server)
 curl -X POST "https://consulente-py.onrender.com/feedback" -H "Content-Type: application/json" -d "{\"description\": \"questo non lo conosce\", \"amount\": -100.0, \"correctAccount\": \"5000\"}"
 
 test per download modello
-
 curl -O "https://consulente-py.onrender.com/download/model"
 
+per scaricare il file di statistiche
+curl -o "server_stats.txt" -X GET "https://consulente-py.onrender.com/stats"
 
 attraverso github (ai4444real@gmail.com) pubblica su render.com
 

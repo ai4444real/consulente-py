@@ -118,9 +118,11 @@
                 <a href="https://consulente-py.onrender.com/download/vectorizer" download="vectorizer_sgd.pkl">
                     Scarica il vettorizzatore (vectorizer_sgd.pkl)</a><br>
                 <a href="https://consulente-py.onrender.com/download/corrections" download="correzioni.json">
-                    Scarica le correzioni (correzioni.json)</a>
+                    Scarica le correzioni (correzioni.json)</a><br>
                 <a href="https://consulente-py.onrender.com/force-download/models">
-                    Forza download dei modelli</a>
+                    Forza download e reload dei modelli</a><br>
+                <a href="https://consulente-py.onrender.com/stats" download="server_stats.txt">
+                    Statistiche</a>
                 </ul>
             <button onclick="showWelcome()">Torna indietro</button>
         </div>
@@ -142,6 +144,7 @@ D:dd.mm.yyyy;T;A;A;X;X
             <input type="file" id="fileInput" accept=".csv"><br>
             <button id="reloadBtn">Ricarica CSV</button>
             <button onclick="predictAccounts()">Predict Accounts</button>
+            <button onclick="downloadForBanana()">Download for 🍌</button>
             <button onclick="showWelcome()">Torna indietro</button>
             <table id="dataTable">
                 <thead>
@@ -158,29 +161,6 @@ D:dd.mm.yyyy;T;A;A;X;X
     </div>
 
     <script src="csvParser.js"></script>
-
-    <script>
-        function predictAccounts() {
-            document.querySelectorAll("#dataTable tbody tr").forEach(row => {
-                const description = row.cells[1].textContent;
-                const amount = parseFloat(row.cells[2].textContent);
-                const predictionCell = row.cells[3];
-                
-                fetch("https://consulente-py.onrender.com/predict", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ description, amount })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    predictionCell.textContent = data.predictedAccount || "N/A";
-                })
-                .catch(() => {
-                    predictionCell.textContent = "Errore";
-                });
-            });
-        }
-    </script>
 
     <script>
         const accountDescriptions = {
@@ -260,6 +240,65 @@ D:dd.mm.yyyy;T;A;A;X;X
             "8500": "Costi straordinari",
             "8900": "Imposte"
         };
+
+        function predictAccounts() {
+            document.querySelectorAll("#dataTable tbody tr").forEach(row => {
+                const description = row.cells[1].textContent;
+                const amount = parseFloat(row.cells[2].textContent);
+                const predictionCell = row.cells[3];
+                
+                fetch("https://consulente-py.onrender.com/predict", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ description, amount })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    predictionCell.textContent = data.predictedAccount || "N/A";
+                })
+                .catch(() => {
+                    predictionCell.textContent = "Errore";
+                });
+            });
+        }
+
+        function downloadForBanana() {
+            const rows = document.querySelectorAll("#dataTable tbody tr");
+            if (rows.length === 0) {
+                alert("⚠️ Nessuna transazione da esportare!");
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            
+            rows.forEach(row => {
+                const date = row.cells[0].textContent.trim(); // Data (dd.mm.yyyy)
+                const description = row.cells[1].textContent.trim(); // Descrizione
+                const amount = parseFloat(row.cells[2].textContent.replace(",", ".")); // Importo
+                let accountCell = row.cells[3].textContent.trim(); // Cella del conto
+
+                // Estrai solo il numero di conto, ignorando la descrizione (se presente)
+                const accountMatch = accountCell.match(/^\d+/);
+                const predictedAccount = accountMatch ? accountMatch[0] : "N/A";
+
+                // Determina conto dare e avere
+                const bankAccount = "1025"; // Conto fisso della banca
+                const accountDare = amount < 0 ? predictedAccount : bankAccount;
+                const accountAvere = amount >= 0 ? predictedAccount : bankAccount;
+
+                // Costruisci la riga CSV
+                csvContent += `${date}; ;${description};${accountDare};${accountAvere};${amount.toFixed(2)}\n`;
+            });
+
+            // Crea e scarica il file CSV
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "banana_export.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
 
 
         function showTestModel() {

@@ -40,3 +40,26 @@ def update_model(description, correct_account):
     features = vectorizer_sgd.transform([description])
     sgd_model.partial_fit(features, [correct_account])  # Usa solo le classi pre-addestrate
     joblib.dump(sgd_model, MODEL_PATH)
+
+def get_model_stats():
+    """Restituisce informazioni sul modello e il vectorizer."""
+    model_size = os.path.getsize(MODEL_PATH) if os.path.exists(MODEL_PATH) else 0
+    vectorizer_size = os.path.getsize(VECTORIZER_PATH) if os.path.exists(VECTORIZER_PATH) else 0
+
+    model_last_modified = (
+        datetime.datetime.fromtimestamp(os.path.getmtime(MODEL_PATH)).strftime('%Y-%m-%d %H:%M:%S')
+        if os.path.exists(MODEL_PATH) else "Non disponibile"
+    )
+    vectorizer_last_modified = (
+        datetime.datetime.fromtimestamp(os.path.getmtime(VECTORIZER_PATH)).strftime('%Y-%m-%d %H:%M:%S')
+        if os.path.exists(VECTORIZER_PATH) else "Non disponibile"
+    )
+
+    return {
+        "Model Name": os.path.basename(MODEL_PATH),
+        "Model Size (bytes)": model_size,
+        "Model Last Modified": model_last_modified,
+        "Vectorizer Name": os.path.basename(VECTORIZER_PATH),
+        "Vectorizer Size (bytes)": vectorizer_size,
+        "Vectorizer Last Modified": vectorizer_last_modified,
+    }

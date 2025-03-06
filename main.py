@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from ml_model.model_handler import predict, update_model
+from ml_model.model_handler import predict, update_model, get_model_stats
 
 from fastapi.responses import FileResponse
 import os
@@ -154,3 +154,48 @@ def force_download_models():
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/stats")
+def get_stats():
+    """Genera un file di testo con le statistiche del modello e delle correzioni."""
+    try:
+        # Ottieni le informazioni sul modello
+        model_stats = get_model_stats()
+
+        # Conta le correzioni presenti
+        if os.path.exists(CORRECTIONS_FILE):
+            with open(CORRECTIONS_FILE, "r", encoding="utf-8") as f:
+                corrections = json.load(f)
+                num_corrections = len(corrections)
+        else:
+            num_corrections = 0
+
+        # Crea il contenuto del file di statistiche
+        stats_content = (
+            f"📊 STATISTICHE SERVER\n\n"
+            f"🧠 Modello:\n"
+            f" - Nome: {model_stats['Model Name']}\n"
+            f" - Dimensione: {model_stats['Model Size (bytes)']} bytes\n"
+            f" - Ultima modifica: {model_stats['Model Last Modified']}\n\n"
+            f"📚 Vettorizzatore:\n"
+            f" - Nome: {model_stats['Vectorizer Name']}\n"
+            f" - Dimensione: {model_stats['Vectorizer Size (bytes)']} bytes\n"
+            f" - Ultima modifica: {model_stats['Vectorizer Last Modified']}\n\n"
+            f"📂 Correzioni:\n"
+            f" - Numero totale di correzioni: {num_corrections}\n"
+        )
+
+        # Salva il file temporaneo
+        stats_file = "server_stats.txt"
+        with open(stats_file, "w", encoding="utf-8") as f:
+            f.write(stats_content)
+
+        return FileResponse(
+            path=stats_file,
+            filename="server_stats.txt",
+            media_type="text/plain",
+            headers={"Content-Disposition": "attachment; filename=server_stats.txt"}
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Errore nella generazione delle statistiche: {e}")

@@ -68,7 +68,7 @@ function processCSV(text) {
             if (m.startsWith('D:')) {
                 dateFormat = m.split(':')[1];
                 date = parseDate(columns[index], dateFormat);
-            } else if (m === 'T') desc = columns[index];
+            } else if (m === 'T') desc = columns[index].replace(/"/g, "");
             else if (m === 'A') amount += parseFloat(columns[index]) || 0;
             else if (m === 'A-') amount -= parseFloat(columns[index]) || 0;
         });

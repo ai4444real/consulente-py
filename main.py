@@ -140,13 +140,17 @@ def get_stats():
         # Ottieni le informazioni sul modello
         model_stats = get_model_stats()
 
-        # Conta le correzioni presenti
+        # Conta le correzioni presenti in modo robusto
+        num_corrections = 0
         if os.path.exists(CORRECTIONS_FILE):
-            with open(CORRECTIONS_FILE, "r", encoding="utf-8") as f:
-                corrections = json.load(f)
-                num_corrections = len(corrections)
-        else:
-            num_corrections = 0
+            try:
+                with open(CORRECTIONS_FILE, "r", encoding="utf-8") as f:
+                    content = f.read().strip()  # Rimuove spazi vuoti
+                    corrections = json.loads(content) if content else []
+                    num_corrections = len(corrections) if isinstance(corrections, list) else 0
+            except json.JSONDecodeError:
+                print(f"⚠️ Warning: Il file {CORRECTIONS_FILE} non è un JSON valido. Ignorato.")
+                num_corrections = 0
 
         # Crea il contenuto del file di statistiche
         stats_content = (
@@ -162,6 +166,17 @@ def get_stats():
             f"📂 Correzioni:\n"
             f" - Numero totale di correzioni: {num_corrections}\n"
         )
+
+        # Se ci sono correzioni, aggiungile al file
+        if num_corrections > 0:
+            stats_content += "\n📜 Dettaglio delle ultime correzioni:\n"
+            for correction in corrections[-5:]:  # Ultime 5 correzioni
+                stats_content += (
+                    f" - Data: {correction.get('Date', 'N/A')}, "
+                    f"Descrizione: {correction.get('Description', 'N/A')}, "
+                    f"Importo: {correction.get('Importo', 'N/A')}, "
+                    f"Conto: {correction.get('Target_Account', 'N/A')}\n"
+                )
 
         # Salva il file temporaneo
         stats_file = "server_stats.txt"

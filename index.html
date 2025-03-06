@@ -179,20 +179,23 @@
         <!-- Schermata Download (inizialmente nascosta) -->
         <div id="download-screen" class="hidden">
             <h2>Operazioni</h2>
-            <ul>
+            
+            <div class="download-buttons">
                 <a href="https://consulente-py.onrender.com/download/model" download="modello_sgd.pkl">
-                    Scarica il modello (modello_sgd.pkl)</a><br>
+                    <button>📥 Scarica il modello</button></a>
                 <a href="https://consulente-py.onrender.com/download/vectorizer" download="vectorizer_sgd.pkl">
-                    Scarica il vettorizzatore (vectorizer_sgd.pkl)</a><br>
+                    <button>📥 Scarica il vettorizzatore</button></a>
                 <a href="https://consulente-py.onrender.com/download/corrections" download="correzioni.json">
-                    Scarica le correzioni (correzioni.json)</a><br>
+                    <button>📥 Scarica le correzioni</button></a>
                 <a href="https://consulente-py.onrender.com/force-download/models">
-                    Forza download e reload dei modelli</a><br>
+                    <button>🔄 Forza download e reload modelli</button></a>
                 <a href="https://consulente-py.onrender.com/stats" download="server_stats.txt">
-                    Statistiche</a>
-                </ul>
-            <button onclick="showWelcome()">Torna indietro</button>
+                    <button>📊 Statistiche</button></a>
+            </div>
+        
+            <button class="back-button" onclick="showWelcome()">🔙 Torna indietro</button>
         </div>
+        
 
         <!-- Schermata Predizione batch (inizialmente nascosta) -->
         <div id="batch-prediction-screen" class="hidden">

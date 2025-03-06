@@ -146,6 +146,13 @@ D:dd.mm.yyyy;T;A;A;X;X
             <button onclick="predictAccounts()">Predict Accounts</button>
             <button onclick="downloadForBanana()">Download for 🍌</button>
             <button onclick="showWelcome()">Torna indietro</button>
+            <label for="bankAccount">Conto bancario:</label>
+            <select id="bankAccount">
+                <option value="1025" selected>PostFinance</option>
+                <option value="1026">PostFinance Riserve</option>
+                <option value="1023">Raiffeisen CHF</option>
+                <option value="1021">Raiffeisen EUR</option>
+            </select>
             <table id="dataTable">
                 <thead>
                     <tr>
@@ -282,7 +289,7 @@ D:dd.mm.yyyy;T;A;A;X;X
                 const predictedAccount = accountMatch ? accountMatch[0] : "N/A";
 
                 // Determina conto dare e avere
-                const bankAccount = "1025"; // Conto fisso della banca
+                const bankAccount = document.getElementById("bankAccount").value;
                 const accountDare = amount < 0 ? predictedAccount : bankAccount;
                 const accountAvere = amount >= 0 ? predictedAccount : bankAccount;
 

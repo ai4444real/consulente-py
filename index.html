@@ -287,7 +287,8 @@ D:dd.mm.yyyy;T;A;A;X;X
                 const accountAvere = amount >= 0 ? predictedAccount : bankAccount;
 
                 // Costruisci la riga CSV
-                csvContent += `${date}; ;${description};${accountDare};${accountAvere};${amount.toFixed(2)}\n`;
+                csvContent += `${date}; ;"${description}";${accountDare};${accountAvere};${amount.toFixed(2)}\n`;
+
             });
 
             // Crea e scarica il file CSV

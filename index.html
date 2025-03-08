@@ -310,14 +310,15 @@ D:dd.mm.yyyy;T;A;A;X;X
         function populateSelect() {
             const selectElement = document.getElementById('correct-account');
             selectElement.innerHTML = '<option value="">Seleziona il conto corretto</option>';
-            accountModule.getAllAccountKeys().forEach(key => {
+            
+            Object.entries(accountDescriptions).forEach(([key, description]) => {
                 const option = document.createElement('option');
                 option.value = key;
-                option.textContent = `${key} - ${accountModule.getAccountDescription(key)}`;
+                option.textContent = `${key} - ${description}`;
                 selectElement.appendChild(option);
             });
         }
-
+    
         loadAccounts();
         populateSelect();
 

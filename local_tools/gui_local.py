@@ -306,21 +306,21 @@ tk.Button(root, text="Correggi", command=confirm_correction).grid(row=4, column=
 tk.Button(root, text="📂 Importa Correzioni", command=import_corrections).grid(row=6, column=1, padx=5, pady=10)
 
 # Bottone per creare un nuovo modello
-tk.Button(root, text="🆕 Crea Modello", command=create_new_model).grid(row=7, column=1, padx=5, pady=10)
+tk.Button(root, text="🆕 Crea Modello", command=create_new_model).grid(row=7, column=0, padx=5, pady=10)
 
 # Bottone per allenare il modello con un file JSON
-tk.Button(root, text="📂 Addestra Modello", command=train_model_from_file).grid(row=7, column=2, padx=5, pady=10)
+tk.Button(root, text="📂 Allena Modello", command=train_model_from_file).grid(row=7, column=1, padx=5, pady=10)
 
 # Bottone per salvare il modello e vectorizer
-tk.Button(root, text="💾 Salva Modello", command=save_model_and_vectorizer).grid(row=8, column=1, padx=5, pady=10)
+tk.Button(root, text="💾 Salva Modello", command=save_model_and_vectorizer).grid(row=7, column=2, padx=5, pady=10)
 
 # Bottone per convertire CSV in JSON
-tk.Button(root, text="📂 CSV2JSON", command=convert_csv_to_json).grid(row=9, column=2, padx=5, pady=10)
+tk.Button(root, text="📂 CSV2JSON", command=convert_csv_to_json).grid(row=8, column=0, padx=5, pady=10)
 
 # Campo per scegliere il separatore
-tk.Label(root, text="Separatore CSV:").grid(row=9, column=0, padx=5, pady=5)
+tk.Label(root, text="Separatore CSV:").grid(row=8, column=1, padx=5, pady=5)
 entry_separator = tk.Entry(root, width=3)
-entry_separator.grid(row=9, column=1, padx=5, pady=5, sticky="w")
+entry_separator.grid(row=8, column=2, padx=5, pady=5, sticky="w")
 entry_separator.insert(0, ",")  # Imposta il valore predefinito
 
 

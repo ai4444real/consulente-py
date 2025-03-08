@@ -61,5 +61,53 @@ def test_correction_saved():
     assert data[-1]["Importo"] == 10.50
     assert data[-1]["Target_Account"] == "5700"
 
+def test_force_download_models():
+    """Test per forzare il download e reload del modello"""
+    response = client.get("/force-download/models")
+    assert response.status_code == 200
+
+def test_download_corrections():
+    """Test per scaricare il file delle correzioni"""
+    # Creiamo un file di test
+    test_data = [{"Date": "2025-03-05", "Description": "Test", "Importo": 5.0, "Target_Account": "6500"}]
+    with open(CORRECTIONS_FILE, "w", encoding="utf-8") as f:
+        json.dump(test_data, f, indent=4, ensure_ascii=False)
+
+    response = client.get("/download/corrections")
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/json"
+
+    # Pulizia
+    os.remove(CORRECTIONS_FILE)
+
+def test_save_correction():
+    """Test per verificare il salvataggio di una correzione"""
+    correction = {
+        "description": "Test correzione",
+        "amount": 10.5,
+        "correctAccount": "5700"
+    }
+    response = client.post("/feedback", json=correction)
+    assert response.status_code == 200
+
+    # Controlla se la correzione è stata salvata
+    with open(CORRECTIONS_FILE, "r", encoding="utf-8") as f:
+        data = json.load(f)
+        assert any(c["Description"] == "Test correzione" for c in data)
+
+    # Pulizia
+    os.remove(CORRECTIONS_FILE)
+
+def test_get_stats():
+    """Test per verificare la generazione delle statistiche"""
+    response = client.get("/stats")
+    assert response.status_code == 200
+    assert "attachment; filename=server_stats.txt" in response.headers["content-disposition"]
+
+
+
+
+
+
 if __name__ == "__main__":
     pytest.main()

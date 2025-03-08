@@ -4,140 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Consulente AI</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f4f4f4;
-            margin: 20px;
-        }
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            max-width: 800px;
-            margin: auto;
-        }
-        button {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            margin: 10px;
-            cursor: pointer;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        button:hover {
-            background-color: #1e7e34;
-        }
-        .hidden {
-            display: none;
-        }
-        input, select {
-            padding: 8px;
-            margin: 5px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        #dataTable {
-            width: auto;
-            max-width: 100%;
-            margin: 0 auto;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        #dataTable th, #dataTable td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        #dataTable th {
-            background-color: #28a745;
-            color: white;
-        }
-        #dataTable td:nth-child(2) {
-            font-size: 12px;
-            white-space: normal;
-            word-wrap: break-word;
-            max-width: 150px;
-        }
-        .radio-group {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-
-        .button-group {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 10px;
-        }
-
-        .button-group button {
-            padding: 8px 15px;
-            font-size: 14px;
-        }
-
-        /* Migliora la selezione del conto bancario */
-        .bank-select {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin: 10px 0;
-        }
-
-        .bank-select label {
-            font-weight: bold;
-        }
-
-        .batch-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 20px;
-            margin-bottom: 10px;
-        }
-
-        /* Colonna sinistra (radio, textarea, file input) */
-        .batch-left {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 10px;
-            width: 45%;
-        }
-
-        /* Textarea più stretta */
-        .config-textarea {
-            width: 100%;
-            min-width: 220px;
-            max-width: 100%;
-        }
-
-        /* Colonna destra (bottoni in verticale, più stretta) */
-        .batch-right {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 30%; /* Più stretta */
-            gap: 5px; /* Spazio ridotto tra i bottoni */
-        }
-
-        /* Bottoni più compatti */
-        .batch-right button {
-            width: 90%; /* Meno larghi */
-            padding: 8px; /* Più compatti */
-            font-size: 14px;
-        }
-
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
@@ -252,86 +119,9 @@ D:dd.mm.yyyy;T;A;A;X;X
     </div>
 
     <script src="csvParser.js"></script>
+    <script src="pnl_accounts.js"></script>
 
     <script>
-        const accountDescriptions = {
-            "1000": "Cassa ",
-            "1001": "Cassa Euro",
-            "1020": "Conto Raiffeisen CHF - linea di credito",
-            "1021": "Conto Raiffeisen EUR",
-            "1023": "Conto Raiffeisen CHF",
-            "1025": "Conto corrente postale",
-            "1026": "Conto corrente postale - riserve",
-            "1027": "Paypal CHF",
-            "1090": "Conto di trasferimento",
-            "1095": "cc Di Gregorio",
-            "1100": "Clienti",
-            "1109": "Delcredere",
-            "1300": "Costi anticipati",
-            "1301": "Ricavi da incassare",
-            "1510": "Mobilio e installazioni",
-            "1520": "Macchine ufficio, informatica e comunicazione",
-            "1526": "Software",
-            "2000": "Creditori",
-            "2050": "cc AVS",
-            "2051": "cc Cassa Pensione LPP",
-            "2052": "cc malattia",
-            "2053": "cc Zurich infortuni",
-            "2054": "cc Imposte alla fonte",
-            "2055": "cc Indennità maternità",
-            "2056": "cc Cassa assegni familiari",
-            "2062": "cc Stipendi altri",
-            "2070": "cc Carta di credito",
-            "2099": "cc Servizio di fatturazione",
-            "2261": "Dividendi",
-            "2281": "Imposta preventiva su dividendi",
-            "2600": "Accantonamenti",
-            "2730": "Transitori passivi",
-            "2800": "Capitale proprio / capitale sociale",
-            "2900": "Riserva legale da capitale",
-            "2990": "Utile o perdita riportata",
-            "3400": "Ricavi da corsi di formazione",
-            "3401": "Ricavi da servizio di fatturazione",
-            "3805": "Perdite su debitori",
-            "6850": "Interessi Attivi",
-            "8510": "Ricavi straordinari",
-            "4400": "Costi per prestazioni di terzi",
-            "4401": "Costi per consulenti interni",
-            "4402": "Costi ausiliari per prestazioni di terzi",
-            "4430": "Dispense",
-            "4460": "Costi associativi",
-            "5000": "Salari",
-            "5001": "Premi prestazioni",
-            "5700": "Contributi AVS/AI/IPG",
-            "5720": "Contributi previdenza professionale",
-            "5730": "Assicurazione infortuni",
-            "5740": "Premi assicurazione malattia",
-            "5750": "Indennità maternità",
-            "5760": "Indennità COVID19",
-            "5790": "Imposta alla fonte",
-            "5820": "Spese di viaggio",
-            "5830": "Rimborsi spese forfettarie",
-            "5870": "Costi assicurativi",
-            "5880": "Altre spese personale (costi senza cliente)",
-            "5890": "Costi formazione ed aggiornamento",
-            "6000": "Pigione/affitto aule",
-            "6105": "Costi leasing immobilizzazioni mobiliari",
-            "6400": "Costi energia",
-            "6500": "Spese ufficio/amministrazione",
-            "6550": "Spese di consulenza amministrativa",
-            "6551": "Spese telefoniche/internet",
-            "6552": "Spese postali",
-            "6600": "Costi di pubblicità e marketing",
-            "6650": "Spese di rappresentanza",
-            "6660": "Costi software",
-            "6700": "Altri costi",
-            "6800": "Interessi e spese bancarie",
-            "6842": "Differenze di cambio/Arrotondamenti",
-            "6900": "Ammortamenti",
-            "8500": "Costi straordinari",
-            "8900": "Imposte"
-        };
-
         function predictAccounts() {
             document.querySelectorAll("#dataTable tbody tr").forEach(row => {
                 const description = row.cells[1].textContent;
@@ -433,7 +223,7 @@ D:dd.mm.yyyy;T;A;A;X;X
             .then(response => response.json())
             .then(data => {
                 const predictedAccount = data.predictedAccount || "Errore nella predizione";
-                const accountName = accountDescriptions[predictedAccount] || "Nome non disponibile";
+                const accountName = accountModule.getAccountDescription(predictedAccount);
 
                 document.getElementById('predicted-account').innerText = `${predictedAccount} - ${accountName}`;
                 document.getElementById('predicted-container').classList.remove('hidden');
@@ -495,7 +285,7 @@ D:dd.mm.yyyy;T;A;A;X;X
                 .then(response => response.json())
                 .then(data => {
                     const predictedAccount = data.predictedAccount || "N/A";
-                    const accountDescription = accountDescriptions[predictedAccount] || "Sconosciuto";
+                    const accountDescription = accountModule.getAccountDescription(predictedAccount);
                     predictionCell.innerHTML = `${predictedAccount}<br><span style='font-size: 12px; color: gray;'>(${accountDescription})</span>`;
                 })
                 .catch(() => {
@@ -507,12 +297,12 @@ D:dd.mm.yyyy;T;A;A;X;X
         function populateSelect() {
             const selectElement = document.getElementById('correct-account');
             selectElement.innerHTML = '<option value="">Seleziona il conto corretto</option>';
-            for (const [key, description] of Object.entries(accountDescriptions)) {
+            accountModule.getAllAccountKeys().forEach(key => {
                 const option = document.createElement('option');
                 option.value = key;
-                option.textContent = `${key} - ${description}`;
+                option.textContent = `${key} - ${accountModule.getAccountDescription(key)}`;
                 selectElement.appendChild(option);
-            }
+            });
         }
 
         populateSelect();

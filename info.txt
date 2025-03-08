@@ -34,6 +34,10 @@ https://ai4444real.github.io/consulente-py/
 supabase login, attraverso github
 
 
+gui locale
+python gui_local.py
+
+
 un po' di casi per testare online e a mano
 ADDEBITO
 ORDINE PERMANENTE: 90-24484602

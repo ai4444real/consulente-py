@@ -192,3 +192,18 @@ def get_stats():
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Errore nella generazione delle statistiche: {e}")
+
+from fastapi.responses import JSONResponse
+
+@app.get("/accounts")
+def get_accounts():
+    """Restituisce la lista di account di default dal server."""
+    path = "accounts/default_accounts.json"
+
+    if not os.path.exists(path):
+        return JSONResponse(content={}, status_code=404)
+
+    with open(path, "r", encoding="utf-8") as f:
+        accounts = json.load(f)
+
+    return JSONResponse(content=accounts)

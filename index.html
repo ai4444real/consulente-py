@@ -294,6 +294,19 @@ D:dd.mm.yyyy;T;A;A;X;X
             });
         }
 
+        let accountDescriptions = {};
+
+        function loadAccounts() {
+            fetch("/accounts")
+                .then(response => response.json())
+                .then(data => {
+                    accountDescriptions = data;
+                    console.log("🔄 Lista account caricata:", accountDescriptions);
+                    populateSelect(); // Aggiorna la select
+                })
+                .catch(error => console.error("❌ Errore nel caricamento degli account:", error));
+        }
+
         function populateSelect() {
             const selectElement = document.getElementById('correct-account');
             selectElement.innerHTML = '<option value="">Seleziona il conto corretto</option>';
@@ -305,6 +318,7 @@ D:dd.mm.yyyy;T;A;A;X;X
             });
         }
 
+        loadAccounts();
         populateSelect();
 
     </script>

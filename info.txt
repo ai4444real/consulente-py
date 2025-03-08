@@ -37,6 +37,14 @@ supabase login, attraverso github
 gui locale
 python gui_local.py
 
+server locale
+da quando abbiamo spostato gli accounts sul server non si può far partire index.html da locale, occorre far partire un server
+python -m http.server 8000
+e chiamarlo con
+http://localhost:8000/index.html
+
+
+
 
 un po' di casi per testare online e a mano
 ADDEBITO

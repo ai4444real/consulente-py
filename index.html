@@ -121,6 +121,8 @@ D:dd.mm.yyyy;T;A;A;X;X
     <script src="csvParser.js"></script>
 
     <script>
+        let userId = "default"
+
         function predictAccounts() {
             document.querySelectorAll("#dataTable tbody tr").forEach(row => {
                 const description = row.cells[1].textContent;

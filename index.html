@@ -137,27 +137,6 @@ D:dd.mm.yyyy;T;A;A;X;X
             document.getElementById("stats-link").href = `https://consulente-py.onrender.com/stats/${userId}`;
         }
 
-        function predictAccounts() {
-            document.querySelectorAll("#dataTable tbody tr").forEach(row => {
-                const description = row.cells[1].textContent;
-                const amount = parseFloat(row.cells[2].textContent);
-                const predictionCell = row.cells[3];
-
-                fetch(`https://consulente-py.onrender.com/predict/${userId}`, { 
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ description, amount })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    predictionCell.textContent = data.predictedAccount || "N/A";
-                })
-                .catch(() => {
-                    predictionCell.textContent = "Errore";
-                });
-            });
-        }
-
         function downloadForBanana() {
             const rows = document.querySelectorAll("#dataTable tbody tr");
             if (rows.length === 0) {
@@ -276,6 +255,56 @@ D:dd.mm.yyyy;T;A;A;X;X
             })
             .catch(() => {
                 alert("Errore nella comunicazione con il server");
+            });
+        }
+/*
+        function predictAccounts() {
+            document.querySelectorAll("#dataTable tbody tr").forEach(row => {
+                const description = row.cells[1].textContent;
+                const amount = parseFloat(row.cells[2].textContent);
+                const predictionCell = row.cells[3];
+
+                fetch(`https://consulente-py.onrender.com/predict/${userId}`, { 
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ description, amount })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    predictionCell.textContent = data.predictedAccount || "N/A";
+                })
+                .catch(() => {
+                    predictionCell.textContent = "Errore";
+                });
+            });
+        }
+*/
+        function predictAccounts() {
+            document.querySelectorAll("#dataTable tbody tr").forEach(row => {
+                const description = row.cells[1].textContent;
+                const amount = parseFloat(row.cells[2].textContent);
+                let predictionCell = row.cells[3];
+                
+                // Se la cella per la predizione non esiste, la creiamo
+                if (!predictionCell) {
+                    predictionCell = document.createElement("td");
+                    row.appendChild(predictionCell);
+                }
+                
+                fetch(`https://consulente-py.onrender.com/predict/${userId}`, { 
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ description, amount })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const predictedAccount = data.predictedAccount || "N/A";
+                    const accountDescription = accountDescriptions[predictedAccount] || "n/a";
+                    predictionCell.innerHTML = `${predictedAccount}<br><span style='font-size: 12px; color: gray;'>(${accountDescription})</span>`;
+                })
+                .catch(() => {
+                    predictionCell.textContent = "Errore";
+                });
             });
         }
 

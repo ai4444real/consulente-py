@@ -196,9 +196,9 @@ def get_stats():
 from fastapi.responses import JSONResponse
 
 @app.get("/accounts/{user_id}")
-def get_accounts():
-    """Restituisce la lista di account di default dal server."""
-    path = "accounts/{user_id}_accounts.json"
+def get_accounts(user_id: str):
+    """Restituisce la lista di account di un utente specifico."""
+    path = f"accounts/{user_id}_accounts.json"  # CORRETTO
 
     if not os.path.exists(path):
         return JSONResponse(content={}, status_code=404)
@@ -207,3 +207,4 @@ def get_accounts():
         accounts = json.load(f)
 
     return JSONResponse(content=accounts)
+

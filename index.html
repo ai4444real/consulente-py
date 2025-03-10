@@ -48,16 +48,22 @@
             <h2>Operazioni</h2>
             
             <div class="download-buttons">
-                <a href="https://consulente-py.onrender.com/download/model" download="modello_sgd.pkl">
-                    <button>📥 Scarica il modello</button></a>
-                <a href="https://consulente-py.onrender.com/download/vectorizer" download="vectorizer_sgd.pkl">
-                    <button>📥 Scarica il vettorizzatore</button></a>
-                <a href="https://consulente-py.onrender.com/download/corrections" download="correzioni.json">
-                    <button>📥 Scarica le correzioni</button></a>
-                <a href="https://consulente-py.onrender.com/force-download/models">
-                    <button>🔄 Forza download e reload modelli</button></a>
-                <a href="https://consulente-py.onrender.com/stats" download="server_stats.txt">
-                    <button>📊 Statistiche</button></a>
+                <a id="download-model-link" download>
+                    <button>📥 Scarica il modello</button>
+                </a>
+                <a id="download-vectorizer-link" download>
+                    <button>📥 Scarica il vettorizzatore</button>
+                </a>
+                <a id="download-corrections-link" download>
+                    <button>📥 Scarica le correzioni</button>
+                </a>
+                <a id="reload-model-link">
+                    <button>🔄 Ricarica modello</button>
+                </a>
+
+                <a id="stats-link" download>
+                    <button>📊 Scarica statistiche</button>
+                </a>
             </div>
         
             <button class="back-button" onclick="showWelcome()">🔙 Torna indietro</button>
@@ -122,6 +128,14 @@ D:dd.mm.yyyy;T;A;A;X;X
 
     <script>
         let userId = "default"
+
+        function updateDownloadLinks() {
+            document.getElementById("download-model-link").href = `https://consulente-py.onrender.com/download/model/${userId}`;
+            document.getElementById("download-vectorizer-link").href = `https://consulente-py.onrender.com/download/vectorizer/${userId}`;
+            document.getElementById("download-corrections-link").href = `https://consulente-py.onrender.com/download/corrections/${userId}`;
+            document.getElementById("reload-model-link").href = `https://consulente-py.onrender.com/force-download/models/${userId}`;
+            document.getElementById("stats-link").href = `https://consulente-py.onrender.com/stats/${userId}`;
+        }
 
         function predictAccounts() {
             document.querySelectorAll("#dataTable tbody tr").forEach(row => {
@@ -213,11 +227,10 @@ D:dd.mm.yyyy;T;A;A;X;X
         }
 
         function predictTransaction() {
-            
             const description = document.getElementById('description').value;
             const amount = parseFloat(document.getElementById('amount').value);
-            
-            fetch("https://consulente-py.onrender.com/predict", {
+
+            fetch(`https://consulente-py.onrender.com/predict/${userId}`, {  // AGGIUNTO userId
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ description, amount })
@@ -226,7 +239,7 @@ D:dd.mm.yyyy;T;A;A;X;X
             .then(data => {
                 const predictedAccount = data.predictedAccount || "Errore nella predizione";
                 const accountDescription = accountDescriptions[predictedAccount] || "n/a";
-                
+
                 document.getElementById('predicted-account').innerText = `${predictedAccount} - ${accountDescription}`;
                 document.getElementById('predicted-container').classList.remove('hidden');
             })
@@ -249,7 +262,7 @@ D:dd.mm.yyyy;T;A;A;X;X
                 return;
             }
 
-            fetch("https://consulente-py.onrender.com/feedback", {
+            fetch(`https://consulente-py.onrender.com/feedback/${userId}`, {  // AGGIUNTO userId
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ description, amount, correctAccount })
@@ -265,7 +278,6 @@ D:dd.mm.yyyy;T;A;A;X;X
                 alert("Errore nella comunicazione con il server");
             });
         }
-
 
         function predictAccounts() {
             document.querySelectorAll("#dataTable tbody tr").forEach(row => {
@@ -303,7 +315,7 @@ D:dd.mm.yyyy;T;A;A;X;X
                 .then(response => response.json())
                 .then(data => {
                     accountDescriptions = data;
-                    console.log("🔄 Lista account caricata per user:" + userId, accountDescriptions);
+                    console.log("🔄 Lista account caricata per user:" + userId);
                     populateSelect(); // Aggiorna la select
                 })
                 .catch(error => console.error("❌ Errore nel caricamento degli account:", error));

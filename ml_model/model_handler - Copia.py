@@ -5,7 +5,7 @@ import requests
 from ml_model.config import MODEL_PATH, VECTORIZER_PATH, MODEL_URL, VECTORIZER_URL
 from fastapi import HTTPException
 
-CORRECTIONS_FILE = "correzioni.json"
+CORRECTIONS_FILE = "corrections.json"
 
 def download_file(url, filename):
     """Scarica un file da un URL solo se non è già presente localmente."""

@@ -1,0 +1,8 @@
+📊 STATISTICHE PER default
+
+🧠 Modello:
+ - Dimensione: 1859733 bytes
+📚 Vettorizzatore:
+ - Dimensione: 76315 bytes
+📂 Correzioni:
+ - Numero totale di correzioni: 0

@@ -299,11 +299,11 @@ D:dd.mm.yyyy;T;A;A;X;X
         let accountDescriptions = {};
 
         function loadAccounts() {
-            fetch("https://consulente-py.onrender.com/accounts")
+            fetch("https://consulente-py.onrender.com/accounts/" + userId)
                 .then(response => response.json())
                 .then(data => {
                     accountDescriptions = data;
-                    console.log("🔄 Lista account caricata");
+                    console.log("🔄 Lista account caricata per user:" + userId);
                     populateSelect(); // Aggiorna la select
                 })
                 .catch(error => console.error("❌ Errore nel caricamento degli account:", error));

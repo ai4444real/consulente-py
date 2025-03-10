@@ -303,7 +303,7 @@ D:dd.mm.yyyy;T;A;A;X;X
                 .then(response => response.json())
                 .then(data => {
                     accountDescriptions = data;
-                    console.log("🔄 Lista account caricata per user:" + userId);
+                    console.log("🔄 Lista account caricata per user:" + userId, accountDescriptions);
                     populateSelect(); // Aggiorna la select
                 })
                 .catch(error => console.error("❌ Errore nel caricamento degli account:", error));

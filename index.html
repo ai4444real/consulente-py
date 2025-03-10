@@ -137,6 +137,8 @@ D:dd.mm.yyyy;T;A;A;X;X
             document.getElementById("stats-link").href = `https://consulente-py.onrender.com/stats/${userId}`;
         }
 
+        updateDownloadLinks();
+
         function downloadForBanana() {
             const rows = document.querySelectorAll("#dataTable tbody tr");
             if (rows.length === 0) {
@@ -257,28 +259,7 @@ D:dd.mm.yyyy;T;A;A;X;X
                 alert("Errore nella comunicazione con il server");
             });
         }
-/*
-        function predictAccounts() {
-            document.querySelectorAll("#dataTable tbody tr").forEach(row => {
-                const description = row.cells[1].textContent;
-                const amount = parseFloat(row.cells[2].textContent);
-                const predictionCell = row.cells[3];
 
-                fetch(`https://consulente-py.onrender.com/predict/${userId}`, { 
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ description, amount })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    predictionCell.textContent = data.predictedAccount || "N/A";
-                })
-                .catch(() => {
-                    predictionCell.textContent = "Errore";
-                });
-            });
-        }
-*/
         function predictAccounts() {
             document.querySelectorAll("#dataTable tbody tr").forEach(row => {
                 const description = row.cells[1].textContent;

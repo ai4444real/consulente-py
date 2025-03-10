@@ -43,8 +43,6 @@ def save_correction(description, amount, correct_account, user_id):
     except Exception as e:
         print(f"❌ Errore nel salvataggio della correzione per {user_id}: {e}")
 
-
-
 app = FastAPI()
 
 app.add_middleware(

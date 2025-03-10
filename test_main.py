@@ -33,7 +33,7 @@ def test_feedback():
     assert response.status_code == 200
     assert response.json()["message"] == "Correzione registrata con successo!"
 
-# Test per verificare che la correzione venga salvata in correzioni.json
+# Test per verificare che la correzione venga salvata in corrections.json.json
 def test_correction_saved():
     sample_feedback = {
         "description": "Test correzione",
@@ -52,13 +52,13 @@ def test_correction_saved():
     assert response.status_code == 200
 
     # Controlliamo che il file sia stato creato
-    assert os.path.exists(corrections_file), "❌ Il file di correzioni non è stato creato"
+    assert os.path.exists(corrections_file), "❌ Il file di corrections.json non è stato creato"
 
     # Controlliamo che il contenuto sia corretto
     with open(corrections_file, "r", encoding="utf-8") as f:
         data = json.load(f)
 
-    assert len(data) > 0, "❌ Il file correzioni è vuoto"
+    assert len(data) > 0, "❌ Il file corrections.json è vuoto"
     assert data[-1]["Description"] == "Test correzione"
     assert data[-1]["Importo"] == 10.50
     assert data[-1]["Target_Account"] == "5700"
@@ -73,8 +73,8 @@ def test_force_download_models():
         assert response.status_code == 200
 
 def test_download_corrections():
-    """Test per verificare il download delle correzioni dell'utente"""
-    corrections_file = "corrections/default_correzioni.json"
+    """Test per verificare il download delle corrections.json dell'utente"""
+    corrections_file = "corrections/default_corrections.json.json"
 
     # Creiamo un file di test se non esiste
     if not os.path.exists("corrections"):
@@ -87,7 +87,7 @@ def test_download_corrections():
     response = client.get("/download/corrections/default")
     
     if response.status_code == 404:
-        print("⚠️ Correzioni non trovate, ma il test passa perché l'API risponde correttamente.")
+        print("⚠️ corrections.json non trovate, ma il test passa perché l'API risponde correttamente.")
     else:
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/json"
@@ -97,7 +97,7 @@ def test_download_corrections():
 
 def save_correction(description, amount, correct_account, user_id):
     """Salva la correzione nel file JSON specifico dell'utente."""
-    corrections_file = f"corrections/{user_id}_correzioni.json"  
+    corrections_file = f"corrections/{user_id}_corrections.json.json"  
 
     correction = {
         "Date": datetime.datetime.today().strftime("%Y-%m-%d"),
@@ -125,7 +125,7 @@ def save_correction(description, amount, correct_account, user_id):
         with open(corrections_file, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4, ensure_ascii=False)
 
-        print(f"✅ Correzione salvata per {user_id}, totale correzioni: {len(data)}")
+        print(f"✅ Correzione salvata per {user_id}, totale corrections.json: {len(data)}")
 
     except Exception as e:
         print(f"❌ Errore nel salvataggio della correzione per {user_id}: {e}")

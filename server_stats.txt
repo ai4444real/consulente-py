@@ -10,5 +10,5 @@
  - Dimensione: 76315 bytes
  - Ultima modifica: 2025-03-03 23:02:06
 
-📂 Correzioni:
- - Numero totale di correzioni: 0
+📂 corrections.json:
+ - Numero totale di corrections.json: 0

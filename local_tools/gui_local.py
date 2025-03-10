@@ -93,7 +93,7 @@ def save_model():
         messagebox.showinfo("Salvataggio", "Modello salvato con successo!")
 
 def import_corrections():
-    """Importa un file di correzioni e aggiorna il modello"""
+    """Importa un file di corrections.json e aggiorna il modello"""
     global current_model, current_vectorizer
 
     if not current_model or not current_vectorizer:
@@ -106,7 +106,7 @@ def import_corrections():
         return
 
     try:
-        # Legge il file JSON delle correzioni
+        # Legge il file JSON delle corrections.json
         df = pd.read_json(file_path)
 
         # Controlla se ha le colonne corrette
@@ -133,10 +133,10 @@ def import_corrections():
         # Addestra il modello con tutte le classi possibili
         current_model.partial_fit(X_train, y_train, classes=all_classes)
 
-        messagebox.showinfo("Successo", f"✅ {len(df)} correzioni importate con successo!")
+        messagebox.showinfo("Successo", f"✅ {len(df)} corrections.json importate con successo!")
     
     except Exception as e:
-        messagebox.showerror("Errore nell'importazione delle correzioni", f"{e}")
+        messagebox.showerror("Errore nell'importazione delle corrections.json", f"{e}")
 
 from sklearn.linear_model import SGDClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -184,7 +184,7 @@ def save_model_and_vectorizer():
     messagebox.showinfo("Successo", f"✅ Modello e vectorizer salvati:\n{model_path}\n{vectorizer_path}")
 
 def train_model_from_file():
-    """Carica un file JSON con correzioni e allena il modello"""
+    """Carica un file JSON con corrections.json e allena il modello"""
     global current_model, current_vectorizer
 
     if not current_model or not current_vectorizer:
@@ -302,8 +302,8 @@ tk.Button(root, text="Correggi", command=confirm_correction).grid(row=4, column=
 # Bottone per testare la correzione
 #tk.Button(root, text="Testa Nuovamente", command=test_correction).grid(row=7, column=1, padx=5, pady=10)
 
-# Bottone per importare correzioni
-tk.Button(root, text="📂 Importa Correzioni", command=import_corrections).grid(row=6, column=1, padx=5, pady=10)
+# Bottone per importare corrections.json
+tk.Button(root, text="📂 Importa corrections.json", command=import_corrections).grid(row=6, column=1, padx=5, pady=10)
 
 # Bottone per creare un nuovo modello
 tk.Button(root, text="🆕 Crea Modello", command=create_new_model).grid(row=7, column=0, padx=5, pady=10)

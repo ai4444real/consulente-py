@@ -38,7 +38,7 @@ def save_correction(description, amount, correct_account, user_id):
         with open(corrections_file, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4, ensure_ascii=False)
 
-        print(f"✅ Correzione salvata per {user_id}, totale correzioni: {len(data)}")
+        print(f"✅ Correzione salvata per {user_id}, totale corrections.json: {len(data)}")
 
     except Exception as e:
         print(f"❌ Errore nel salvataggio della correzione per {user_id}: {e}")
@@ -116,16 +116,16 @@ def home():
 
 @app.get("/download/corrections/{user_id}")
 def download_corrections(user_id: str):
-    """Scarica il file delle correzioni specifico dell'utente."""
-    corrections_file = f"corrections/{user_id}_correzioni.json"
+    """Scarica il file delle corrections.json specifico dell'utente."""
+    corrections_file = f"corrections/{user_id}_corrections.json"
 
     if os.path.exists(corrections_file):
         return FileResponse(
             path=corrections_file,
-            filename=f"{user_id}_correzioni.json",
+            filename=f"{user_id}_corrections.json",
             media_type="application/json",
             headers={
-                "Content-Disposition": f"attachment; filename={user_id}_correzioni.json",
+                "Content-Disposition": f"attachment; filename={user_id}_corrections.json",
                 "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
                 "Pragma": "no-cache",
                 "Expires": "0"

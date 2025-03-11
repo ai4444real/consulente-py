@@ -24,12 +24,16 @@ def save_correction(description, amount, correct_account, user_id):
     corrections_file = f"corrections/{user_id}_corrections.json"
 
     try:
-        # Legge il file se esiste, altrimenti inizializza una lista vuota
+        # Verifica se il file esiste e non è vuoto
         if os.path.exists(corrections_file):
             with open(corrections_file, "r", encoding="utf-8") as f:
-                data = json.load(f) if f.read().strip() else []
+                try:
+                    data = json.load(f)  # Prova a caricare il JSON
+                except json.JSONDecodeError:
+                    print(f"⚠️ Il file {corrections_file} era corrotto o vuoto. Verrà ricreato.")
+                    data = []
         else:
-            data = []
+            data = []  # Se il file non esiste, inizializza una lista vuota
 
         # Aggiunge la nuova correzione
         data.append(correction)
@@ -38,10 +42,11 @@ def save_correction(description, amount, correct_account, user_id):
         with open(corrections_file, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4, ensure_ascii=False)
 
-        print(f"✅ Correzione salvata per {user_id}, totale corrections.json: {len(data)}")
+        print(f"✅ Correzione salvata per {user_id}, totale correzioni: {len(data)}")
 
     except Exception as e:
         print(f"❌ Errore nel salvataggio della correzione per {user_id}: {e}")
+
 
 app = FastAPI()
 

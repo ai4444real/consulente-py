@@ -2,6 +2,7 @@ import joblib
 import os
 import datetime
 import requests
+import json
 from fastapi import HTTPException
 from fastapi.responses import FileResponse
 from ml_model.config import MODEL_PATH, VECTORIZER_PATH, MODEL_URL, VECTORIZER_URL
@@ -84,37 +85,68 @@ def reload_model(user_id):
         raise HTTPException(status_code=500, detail=str(e))
 
 def generate_user_stats(user_id):
-    """Restituisce informazioni sul modello e sulle correzioni per un utente specifico."""
+    """Restituisce informazioni sul modello, vettorizzatore e correzioni per un utente specifico."""
     model_path = f"models/{user_id}_model_sgd.pkl"
     vectorizer_path = f"models/{user_id}_vectorizer_sgd.pkl"
-    corrections_file = f"corrections/{user_id}_correzioni.json"
+    corrections_file = f"corrections/{user_id}_corrections.json"
 
+    # Controlla se il modello e il vettorizzatore esistono
     if not os.path.exists(model_path) or not os.path.exists(vectorizer_path):
         raise HTTPException(status_code=404, detail=f"Modello non trovato per l'utente '{user_id}'")
 
+    # Ottiene dimensione e ultima modifica dei file
     model_size = os.path.getsize(model_path) if os.path.exists(model_path) else 0
     vectorizer_size = os.path.getsize(vectorizer_path) if os.path.exists(vectorizer_path) else 0
 
+    model_last_modified = (
+        datetime.datetime.fromtimestamp(os.path.getmtime(model_path)).strftime('%Y-%m-%d %H:%M:%S')
+        if os.path.exists(model_path) else "Non disponibile"
+    )
+    vectorizer_last_modified = (
+        datetime.datetime.fromtimestamp(os.path.getmtime(vectorizer_path)).strftime('%Y-%m-%d %H:%M:%S')
+        if os.path.exists(vectorizer_path) else "Non disponibile"
+    )
+
+    # Controlla le correzioni
     num_corrections = 0
+    last_corrections = []
     if os.path.exists(corrections_file):
         try:
             with open(corrections_file, "r", encoding="utf-8") as f:
                 corrections = json.load(f)
                 num_corrections = len(corrections) if isinstance(corrections, list) else 0
+                last_corrections = corrections[-5:]  # Ultime 5 correzioni
         except json.JSONDecodeError:
             print(f"⚠️ Warning: Il file {corrections_file} non è un JSON valido. Ignorato.")
             num_corrections = 0
 
+    # Crea il contenuto del file di statistiche
     stats_content = (
         f"📊 STATISTICHE PER {user_id}\n\n"
         f"🧠 Modello:\n"
+        f" - Nome: {os.path.basename(model_path)}\n"
         f" - Dimensione: {model_size} bytes\n"
+        f" - Ultima modifica: {model_last_modified}\n\n"
         f"📚 Vettorizzatore:\n"
+        f" - Nome: {os.path.basename(vectorizer_path)}\n"
         f" - Dimensione: {vectorizer_size} bytes\n"
+        f" - Ultima modifica: {vectorizer_last_modified}\n\n"
         f"📂 Correzioni:\n"
         f" - Numero totale di correzioni: {num_corrections}\n"
     )
 
+    # Se ci sono correzioni, aggiungile al file
+    if num_corrections > 0:
+        stats_content += "\n📜 Ultime correzioni:\n"
+        for correction in last_corrections:
+            stats_content += (
+                f" - Data: {correction.get('Date', 'N/A')}, "
+                f"Descrizione: {correction.get('Description', 'N/A')}, "
+                f"Importo: {correction.get('Importo', 'N/A')}, "
+                f"Conto: {correction.get('Target_Account', 'N/A')}\n"
+            )
+
+    # Salva il file temporaneo delle statistiche
     stats_file = f"stats/{user_id}_stats.txt"
     os.makedirs("stats", exist_ok=True)
 
@@ -126,3 +158,4 @@ def generate_user_stats(user_id):
         filename=f"{user_id}_stats.txt",
         media_type="text/plain"
     )
+

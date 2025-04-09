@@ -3,7 +3,7 @@ import pytesseract
 from pdf2image import convert_from_path
 
 def run_ocr(pdf_path):
-    images = convert_from_path(pdf_path)
+    images = convert_from_path(pdf_path, dpi=300)
     text = ""
     for image in images:
         text += pytesseract.image_to_string(image, lang="ita")

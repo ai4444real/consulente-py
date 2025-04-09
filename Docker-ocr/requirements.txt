@@ -2,3 +2,4 @@ fastapi
 uvicorn
 pytesseract
 pdf2image
+python-multipart

@@ -1,0 +1,25 @@
+FROM python:3.11-slim
+
+# Install OCR tools (serve a pdf-reader)
+RUN apt-get update && apt-get install -y \
+    poppler-utils \
+    tesseract-ocr \
+    tesseract-ocr-ita \
+    && apt-get clean
+
+WORKDIR /app
+
+# Copia tutto (predictor, pdf_reader, main.py ecc.)
+COPY . .
+
+# Installa dipendenze
+RUN pip install --no-cache-dir -r requirements.txt
+
+# PYTHONPATH per import predictor, pdf_reader ecc.
+ENV PYTHONPATH=/app
+
+# Espone la porta FastAPI
+EXPOSE 8000
+
+# Avvia FastAPI con --reload per sviluppo
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]

@@ -1,0 +1,276 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulente AI (locale)</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="config.js"></script>
+</head>
+<body>
+
+<!-- Contenuto visivo mantenuto identico all'originale -->
+<div class="container">
+    <div id="welcome-screen">
+        <h1>Benvenuto nel Consulente AI</h1>
+        <button onclick="showTestModel()">Testa Modello</button>
+        <button onclick="showDownload()">Operazioni</button>
+        <button onclick="showBatchPrediction()">Predizione batch</button>
+    </div>
+
+    <div id="test-model-screen" class="hidden">
+        <h2>Test del Modello</h2>
+        <h3>Inserisci una transazione</h3>
+        <input type="text" id="description" placeholder="Descrizione"><br>
+        <!--<input type="number" id="amount" placeholder="Importo"><br>-->
+        <button onclick="predictTransaction()">Predici</button>
+        <div id="predicted-container" class="hidden">
+            <h3>Risultato</h3>
+            <p id="predicted-account">-</p>
+            <button onclick="showSingleFeedback()">Feedback</button>
+        </div>
+        <div id="feedback-container" class="hidden">
+            <h3>Correzione</h3>
+            <select id="correct-account">
+                <option value="">Seleziona il conto corretto</option>
+            </select>
+            <button onclick="sendCorrection()">Invia Correzione</button>
+        </div>
+        <button onclick="showWelcome()">Torna indietro</button>
+    </div>
+
+    <div id="download-screen" class="hidden">
+        <h2>Operazioni</h2>
+        <div class="download-buttons">
+            <a id="download-model-link" download><button>📥 Scarica il modello</button></a>
+            <a id="download-vectorizer-link" download><button>📥 Scarica il vettorizzatore</button></a>
+            <a id="download-corrections-link" download><button>📥 Scarica le corrections.json</button></a>
+            <a id="reload-model-link"><button style="display:none;">🔄 Ricarica modello</button></a>
+            <a id="stats-link" download><button>📊 Scarica statistiche</button></a>
+        </div>
+        <button class="back-button" onclick="showWelcome()">🔙 Torna indietro</button>
+    </div>
+
+    <div id="batch-prediction-screen" class="hidden">
+        <h1>Predizione batch</h1>
+        <div class="batch-container">
+            <div class="batch-left">
+                <div class="radio-group">
+                    <label>Seleziona banca:</label>
+                    <input type="radio" name="bank" id="postfinance" checked> PostFinance
+                    <input type="radio" name="bank" id="raiffeisen"> Raiffeisen
+                </div>
+                <textarea id="config" rows="3" class="config-textarea">;
+8;3
+D:dd.mm.yyyy;T;A;A;X;X</textarea>
+                <input type="file" id="fileInput" accept=".csv">
+            </div>
+            <div class="batch-right">
+                <button id="reloadBtn">🔄 Ricarica CSV</button>
+                <button onclick="predictAccounts()">🔍 Predict Accounts</button>
+                <button onclick="downloadForBanana()">🍌 Download</button>
+                <button onclick="showWelcome()">🔙 Torna indietro</button>
+            </div>
+        </div>
+        <div class="bank-select">
+            <label for="bankAccount">Conto bancario:</label>
+            <select id="bankAccount">
+                <option value="1025" selected>PostFinance</option>
+                <option value="1026">PostFinance Riserve</option>
+                <option value="1023">Raiffeisen CHF</option>
+                <option value="1021">Raiffeisen EUR</option>
+            </select>
+        </div>
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Descrizione</th>
+                    <th>Importo</th>
+                    <th>Predizione</th>
+                    <th>Feedback</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Script completo inline -->
+<script>
+let userId = "default";
+let accountDescriptions = {};
+
+function updateDownloadLinks() {
+    document.getElementById("download-model-link").href = `${API_BASE_URL}/predictor/download/model/${userId}`;
+    document.getElementById("download-vectorizer-link").href = `${API_BASE_URL}/predictor/download/vectorizer/${userId}`;
+    document.getElementById("download-corrections-link").href = `${API_BASE_URL}/predictor/download/corrections/${userId}`;
+    document.getElementById("reload-model-link").style.display = "none";
+    document.getElementById("stats-link").href = `${API_BASE_URL}/predictor/stats/${userId}`;
+}
+
+function showTestModel() { showScreen('test-model-screen'); }
+
+function showDownload() { showScreen('download-screen'); }
+
+function showBatchPrediction() { showScreen('batch-prediction-screen'); }
+
+function showWelcome() { showScreen('welcome-screen'); }
+
+function showScreen(id) {
+    ['welcome-screen','test-model-screen','download-screen','batch-prediction-screen']
+    .forEach(e => document.getElementById(e).classList.add('hidden'));
+    document.getElementById(id).classList.remove('hidden');
+}
+
+function predictTransaction() {
+    const description = document.getElementById('description').value;
+    //const amount = parseFloat(document.getElementById('amount').value);
+    fetch(`${API_BASE_URL}/predictor/predict/${userId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: description })
+    }).then(r => r.json()).then(data => {
+        const p = data.predictedAccount || "Errore";
+        const d = accountDescriptions[p] || "n/a";
+        document.getElementById('predicted-account').innerText = `${p} - ${d}`;
+        document.getElementById('predicted-container').classList.remove('hidden');
+    }).catch(() => document.getElementById('predicted-account').innerText = "Errore nella comunicazione");
+}
+
+function showSingleFeedback() {
+    document.getElementById('feedback-container').classList.remove('hidden');
+}
+
+function sendCorrection() {
+    const text = document.getElementById('description').value;
+    //const amount = parseFloat(document.getElementById('amount').value);
+    const label = document.getElementById('correct-account').value;
+    if (!label) return alert("Seleziona un conto valido!");
+    fetch(`${API_BASE_URL}/predictor/feedback/${userId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, label })
+    }).then(r => r.json()).then(data => {
+        alert(data.message || "Feedback registrato");
+        document.getElementById('feedback-container').classList.add('hidden');
+    }).catch(() => alert("Errore nella comunicazione"));
+}
+
+function predictAccounts() {
+    document.querySelectorAll("#dataTable tbody tr").forEach(row => {
+        const description = row.cells[1].textContent;
+        let predictionCell = row.cells[3] || row.insertCell(3);
+        fetch(`${API_BASE_URL}/predictor/predict/${userId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: description})
+        }).then(r => r.json()).then(data => {
+            const p = data.predictedAccount || "N/A";
+            const d = accountDescriptions[p] || "n/a";
+            predictionCell.innerHTML = `${p}<br><span style='font-size: 12px; color: gray;'>(${d})</span>`;
+            let feedbackCell = row.cells[4] || row.insertCell(4);
+            feedbackCell.innerHTML = `
+            <button onclick="showFeedback(this, \`${description}\`)">🛠️</button>
+            <div class="feedback-ui" style="display:none;"></div>
+            `;
+        }).catch(() => predictionCell.textContent = "Errore");
+    });
+}
+
+function populateSelect() {
+    const sel = document.getElementById('correct-account');
+    sel.innerHTML = '<option value="">Seleziona il conto corretto</option>';
+    Object.entries(accountDescriptions).forEach(([k, d]) => {
+        const o = document.createElement('option');
+        o.value = k; o.textContent = `${k} - ${d}`; sel.appendChild(o);
+    });
+}
+
+function loadAccounts() {
+    fetch(`${API_BASE_URL}/predictor/download/labels/${userId}`)
+        .then(r => r.json())
+        .then(data => { accountDescriptions = data; populateSelect(); })
+        .catch(err => console.error("Errore nel caricamento degli account:", err));
+}
+
+function showFeedback(button, description) {
+  const container = button.nextElementSibling;
+  if (container.innerHTML) return; // già aperto
+
+  const select = document.createElement("select");
+  Object.entries(accountDescriptions).forEach(([code, name]) => {
+    const option = document.createElement("option");
+    option.value = code;
+    option.textContent = code + " - " + name;
+    select.appendChild(option);
+  });
+
+  const confirm = document.createElement("button");
+  confirm.textContent = "Invia";
+  confirm.onclick = () => {
+    const label = select.value;
+    fetch(`${API_BASE_URL}/predictor/feedback/default`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: description, label })
+    }).then(() => {
+      container.innerHTML = "✅";
+    }).catch(() => {
+      container.innerHTML = "Errore";
+    });
+  };
+
+  container.appendChild(select);
+  container.appendChild(confirm);
+  container.style.display = "block";
+}
+
+function downloadForBanana() {
+    const rows = document.querySelectorAll("#dataTable tbody tr");
+    if (rows.length === 0) {
+        alert("⚠️ Nessuna transazione da esportare!");
+        return;
+    }
+
+    let csvContent = "data:text/csv;charset=utf-8,";
+    
+    rows.forEach(row => {
+        const date = row.cells[0].textContent.trim(); // Data (dd.mm.yyyy)
+        const description = row.cells[1].textContent.trim(); // Descrizione
+        const amount = parseFloat(row.cells[2].textContent.replace(",", ".")); // Importo
+        let accountCell = row.cells[3].textContent.trim(); // Cella del conto
+
+        // Estrai solo il numero di conto, ignorando la descrizione (se presente)
+        const accountMatch = accountCell.match(/^\d+/);
+        const predictedAccount = accountMatch ? accountMatch[0] : "N/A";
+
+        // Determina conto dare e avere
+        const bankAccount = document.getElementById("bankAccount").value;
+        const accountDare = amount < 0 ? predictedAccount : bankAccount;
+        const accountAvere = amount >= 0 ? predictedAccount : bankAccount;
+
+        // Costruisci la riga CSV
+        csvContent += `${date}; ;"${description}";${accountDare};${accountAvere};${amount.toFixed(2)}\n`;
+
+    });
+
+    // Crea e scarica il file CSV
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "banana_export.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+updateDownloadLinks();
+loadAccounts();
+populateSelect();
+</script>
+
+<script src="csvParser.js"></script>
+</body>
+</html>

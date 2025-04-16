@@ -46,6 +46,7 @@ http://localhost:8000/index.html
 
 
 
+
 un po' di casi per testare online e a mano
 ADDEBITO
 ORDINE PERMANENTE: 90-24484602
@@ -107,5 +108,138 @@ con -1800
 test
 pytest test_main.py
 
+test pdf extractor
+pytest -s pdf_extractor/tests/test_extract.py
+
+
 transazione per provare se il modello "impara" dal feedback
 prova per vedere se il modello integra i feedback
+
+
+
+con Docker
+docker build -t ocr-test .
+docker run --rm ocr-test
+
+deploy
+git add .
+git commit -m "Primo setup OCR in Docker"
+
+
+
+
+con Docker monorepo:pdf-reader
+build produzione
+docker build -t consulente-py:pdf-reader .
+
+build per test in locale
+docker build -f Dockerfile.dev -t consulente-py:pdf-reader-dev .
+
+
+test locale lettura "plain" senza OCR
+docker run --rm -it -v %cd%/pdf_extractor/sample_pdfs:/data consulente-py:pdf-reader python extract.py /data/test.pdf
+
+test locale lettura con OCR
+docker run --rm -it -v %cd%/pdf_extractor/sample_pdfs:/data consulente-py:pdf-reader python extract.py /data/test_ocr.pdf
+
+test remoto
+curl -X POST "https://consulente-py.fly.dev/read-pdf" -H "accept: text/plain" -H "Content-Type: multipart/form-data" -F "file=@pdf_extractor/sample_pdfs/test.pdf"
+curl -X POST "https://consulente-py.fly.dev/read-pdf" -H "accept: text/plain" -H "Content-Type: multipart/form-data" -F "file=@pdf_extractor/sample_pdfs/test_ocr.pdf"
+
+
+test docker parte in locale
+docker run --rm -it -p 8000:8000 consulente-py:pdf-reader
+
+test locale con curl
+curl -X POST http://localhost:8000/read-pdf -F "file=@pdf_extractor/sample_pdfs/test.pdf"
+curl -X POST http://localhost:8000/read-pdf -F "file=@pdf_extractor/sample_pdfs/test_ocr.pdf"
+
+deploy su fly
+fly deploy --local-only --image consulente-py:pdf-reader
+
+docker monorepo:consulente-py:predictor
+build prod
+docker build -t consulente-py:predictor .
+
+build per test in locale
+docker build -f Dockerfile.dev -t consulente-py:predictor-dev .
+
+
+setta variabili d'ambiente in docker 
+docker run --rm -it -e SUPABASE_URL=https://https://zulsyfmxuczxfkygphkb.supabase.co -e SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1bHN5Zm14dWN6eGZreWdwaGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5MzkzMDgsImV4cCI6MjA1NjUxNTMwOH0.Mt_qQThNh2XZhaIu3Wezszg_63k7WuFFtzLAFMGSkJc -p 8000:8000 consulente-py:predictor
+
+SUPABASE_URL = os.getenv("SUPABASE_URL", "https://zulsyfmxuczxfkygphkb.supabase.co")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1bHN5Zm14dWN6eGZreWdwaGtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA5MzkzMDgsImV4cCI6MjA1NjUxNTMwOH0.Mt_qQThNh2XZhaIu3Wezszg_63k7WuFFtzLAFMGSkJc")
+
+
+setta variabili d'ambiente in fly
+fly secrets set SUPABASE_URL=https://xxx.supabase.co SUPABASE_KEY=eyJhbGciOi...
+
+
+
+in locale
+docker build -f Dockerfile.dev -t consulente-py:predictor-dev .
+docker run --rm -it -p 8000:8000 -v %cd%:/app consulente-py:predictor-dev uvicorn predictor.main:app --host 0.0.0.0 --port 8000 --reload
+
+in prod
+docker build -f Dockerfile.dev -t consulente-py:predictor-dev .
+docker run --rm -it -p 8000:8000 -v %cd%:/app consulente-py:predictor-dev uvicorn predictor.main:app --host 0.0.0.0 --port 8000 --reload
+
+test locale di predictor, predizione (purtroppo in windows occorrono dei file da "cariare" altrimenti curl non funziona)
+curl -X POST http://localhost:8000/predict/default -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@input-predict.txt;type=text/plain"
+curl -X POST http://localhost:8000/feedback/default -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@input-feedback.txt;type=text/plain"
+curl -X POST http://localhost:8000/feedback/default -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@input-feedback-classe-non-valida.txt;type=text/plain"
+curl http://localhost:8000/stats/default --output stats.txt
+curl -X GET http://localhost:8000/download/model/default --output model.pkl
+curl -X GET http://localhost:8000/download/vectorizer/default --output vectorizer.pkl
+curl -X GET http://localhost:8000/download/corrections/default --output corrections.json
+
+
+deploy
+docker build -t consulente-py:predictor .
+fly deploy --dockerfile Dockerfile
+
+curl -X POST https://consulente-py.fly.dev/predict/default -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@input-predict.txt;type=text/plain"
+curl -X POST https://consulente-py.fly.dev/feedback/default -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@input-feedback.txt;type=text/plain"
+curl -X POST https://consulente-py.fly.dev/feedback/default -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@input-feedback-classe-non-valida.txt;type=text/plain"
+curl https://consulente-py.fly.dev/stats/default --output stats.txt
+curl -X GET https://consulente-py.fly.dev/download/model/default --output model.pkl
+curl -X GET https://consulente-py.fly.dev/download/vectorizer/default --output vectorizer.pkl
+curl -X GET https://consulente-py.fly.dev/download/corrections/default --output corrections.json
+
+
+
+un solo docker con entrambi i servizi
+
+build e run locale
+docker build -f Dockerfile.dev -t consulente-py:dev .
+docker run --rm -it -p 8000:8000 consulente-py:dev
+docker run --rm -it -p 8000:8000 -v %cd%:/app consulente-py:dev
+
+montando la cartella locale, così che fa reload quando cambi qualcosa, senza dover rifare tutto
+docker run --rm -it -v %cd%:/app -p 8000:8000 consulente-py:dev
+
+curl -X POST http://localhost:8000/predictor/predict/default -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@input-predict.txt;type=text/plain"
+curl -X POST http://localhost:8000/predictor/feedback/default -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@input-feedback.txt;type=text/plain"
+curl -X POST http://localhost:8000/predictor/feedback/default -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@input-feedback-classe-non-valida.txt;type=text/plain"
+curl http://localhost:8000/predictor/stats/default --output stats.txt
+curl -X GET http://localhost:8000/predictor/download/model/default --output model.pkl
+curl -X GET http://localhost:8000/predictor/download/vectorizer/default --output vectorizer.pkl
+curl -X GET http://localhost:8000/predictor/download/corrections/default --output corrections.json
+
+curl -X POST http://localhost:8000/pdf/read -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@pdf_reader/sample_pdfs/test.pdf;type=application/pdf"
+curl -X POST http://localhost:8000/pdf/read -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@pdf_reader/sample_pdfs/test_ocr.pdf;type=application/pdf"
+
+deploy su fly
+fly deploy
+
+curl -X POST https://consulente-py.fly.dev/predictor/predict/default -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@input-predict.txt;type=text/plain"
+curl -X POST https://consulente-py.fly.dev/predictor/feedback/default -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@input-feedback.txt;type=text/plain"
+curl -X POST https://consulente-py.fly.dev/predictor/feedback/default -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@input-feedback-classe-non-valida.txt;type=text/plain"
+curl https://consulente-py.fly.dev/predictor/stats/default --output stats.txt
+curl -X GET https://consulente-py.fly.dev/predictor/download/model/default --output model.pkl
+curl -X GET https://consulente-py.fly.dev/predictor/download/vectorizer/default --output vectorizer.pkl
+curl -X GET https://consulente-py.fly.dev/predictor/download/corrections/default --output corrections.json
+
+curl -X POST https://consulente-py.fly.dev/pdf/read -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@pdf_reader/sample_pdfs/test.pdf;type=application/pdf"
+curl -X POST https://consulente-py.fly.dev/pdf/read -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@pdf_reader/sample_pdfs/test_ocr.pdf;type=application/pdf"

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Predizione da PDF con Feedback (Colonna separata)</title>
+  <script src="config.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; vertical-align: top; }
+    th { background-color: #f2f2f2; }
+    button { margin: 5px; padding: 6px 10px; background: #2a7b55; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #246a48; }
+    select { margin-top: 4px; }
+    .account-desc { color: #888; font-size: 0.8em; margin-top: 2px; }
+    #config-section { margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+  <h1>Predizione da PDF con Feedback (Colonna separata)</h1>
+
+  <input type="file" id="pdfInput" accept=".pdf">
+  <button onclick="uploadPDF()">Carica e analizza</button>
+  <button onclick="predictAll()">Predict</button>
+
+  <div id="config-section">
+    <label for="contraAccount">Conto contropartita (default 2070): </label>
+    <input type="text" id="contraAccount" value="2070">
+    <button onclick="downloadForBanana()">Download for Banana</button>
+  </div>
+
+  <table id="resultTable" style="display:none;">
+    <thead>
+      <tr><th>Data</th><th>Descrizione</th><th>Importo (CHF)</th><th>Predizione</th><th>Feedback</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    let extractedRows = [];
+    let accounts = {};
+
+    async function loadAccounts() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/predictor/download/labels/default`);
+        const data = await res.json();
+        accounts = data;
+      } catch (e) {
+        console.error("Errore nel caricamento degli account", e);
+      }
+    }
+
+    async function uploadPDF() {
+      await loadAccounts();
+      const fileInput = document.getElementById("pdfInput");
+      if (fileInput.files.length === 0) {
+        alert("Seleziona un file PDF.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", fileInput.files[0]);
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/pdf/extract/creditcard-transactions`, {
+          method: "POST",
+          body: formData
+        });
+
+        if (!response.ok) throw new Error(await response.text());
+        extractedRows = await response.json();
+        renderTable(extractedRows);
+      } catch (err) {
+        alert("Errore nella lettura del PDF: " + err.message);
+      }
+    }
+
+    function renderTable(rows) {
+      const table = document.getElementById("resultTable");
+      const tbody = table.querySelector("tbody");
+      tbody.innerHTML = "";
+      rows.forEach((row, index) => {
+        const predDesc = accounts[row.predicted] || "n/a";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${row.date}</td>
+          <td>${row.text}</td>
+          <td>${row.chf}</td>
+          <td id="prediction-${index}">
+            ${row.predicted || "-"}
+            <div class='account-desc'>(${predDesc})</div>
+          </td>
+          <td id="feedback-${index}">
+            <button onclick="showFeedback(${index})">🛠️</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      table.style.display = "";
+    }
+
+    async function predictAll() {
+      for (let i = 0; i < extractedRows.length; i++) {
+        const row = extractedRows[i];
+        try {
+          const res = await fetch(`${API_BASE_URL}/predictor/predict/default`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: row.text, chf: row.chf })
+          });
+          const data = await res.json();
+          extractedRows[i].predicted = data.predictedAccount || "N/D";
+        } catch {
+          extractedRows[i].predicted = null;
+        }
+      }
+      renderTable(extractedRows);
+    }
+
+    function showFeedback(index) {
+      const cell = document.getElementById(`feedback-${index}`);
+      cell.innerHTML = "";
+      const select = document.createElement("select");
+      for (const [code, name] of Object.entries(accounts)) {
+        const opt = document.createElement("option");
+        opt.value = code;
+        opt.textContent = `${code} - ${name}`;
+        select.appendChild(opt);
+      }
+      const btn = document.createElement("button");
+      btn.textContent = "Invia";
+      btn.onclick = () => {
+        const label = select.value;
+        const row = extractedRows[index];
+        fetch(`${API_BASE_URL}/predictor/feedback/default`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: row.text, label })
+        }).then(() => {
+          row.predicted = label;
+          renderTable(extractedRows);
+        }).catch(() => {
+          cell.innerHTML = "Errore";
+        });
+      };
+      cell.appendChild(select);
+      cell.appendChild(btn);
+    }
+
+    function downloadForBanana() {
+      const contra = document.getElementById("contraAccount").value || "2070";
+      let csv = "";
+      extractedRows.forEach(row => {
+        if (row.predicted && row.chf && row.date) {
+          csv += `${row.date};;${row.text};${row.predicted};${contra};${row.chf}\n`;
+        }
+      });
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "banana_output.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Tester Curl</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f8f9fa; padding: 20px; }
+    h1 { text-align: center; }
+    .env-selector { text-align: center; margin-bottom: 20px; }
+    .command-box {
+      background: #fff; border: 1px solid #ddd; border-radius: 8px;
+      padding: 15px; margin-bottom: 15px; position: relative;
+    }
+    .command-box pre { margin: 0 0 10px; white-space: pre-wrap; word-break: break-word; }
+    .command-box .status {
+      position: absolute; top: 10px; right: 10px; width: 12px; height: 12px;
+      border-radius: 50%; background: #ccc;
+    }
+    .command-box .status.success { background: #4caf50; }
+    .command-box .status.error { background: #f44336; }
+    button {
+      margin-right: 8px; padding: 6px 12px; border: none; border-radius: 5px;
+      background-color: #007bff; color: white; cursor: pointer;
+    }
+    button:hover { background-color: #0056b3; }
+    #run-all {
+      display: block; margin: 20px auto;
+      background-color: #28a745;
+    }
+    .output {
+      background: #f1f1f1; padding: 10px; border-radius: 5px;
+      margin-top: 10px; font-family: monospace; white-space: pre-wrap;
+      pointer-events: none; user-select: text;
+    }
+    input[type="file"] {
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Tester Curl</h1>
+
+  <div class="env-selector">
+    <label><input type="radio" name="env" value="local" checked> Local</label>
+    <label><input type="radio" name="env" value="fly"> Fly</label>
+  </div>
+
+  <button id="run-all">Esegui Tutti</button>
+
+  <div id="commands"></div>
+
+  <script>
+    const baseURLs = {
+      local: "http://localhost:8000",
+      fly: "https://consulente-py.fly.dev"
+    };
+
+    const parsedCommands = [];
+
+    const fileSimulations = {
+      "input-predict.txt": {
+        content: "Acquisto cancelleria",
+        type: "text/plain"
+      },
+      "input-feedback.txt": {
+        content: JSON.stringify({ text: "Acquisto cancelleria", label: "6500" }),
+        type: "application/json"
+      },
+      "input-feedback-classe-non-valida.txt": {
+        content: JSON.stringify({ text: "Acquisto cancelleria", label: "5555" }),
+        type: "application/json"
+      }
+    };
+    
+    const rawCommands = [
+    "curl -X POST {{base}}/predictor/predict/default -H \"Content-Type: application/json\" -d '{\"text\":\"Acquisto cancelleria\"}'",
+    "curl -X POST {{base}}/predictor/feedback/default -H \"Content-Type: application/json\" -d '{\"text\":\"Acquisto cancelleria\",\"label\":\"6500\"}'",
+    "curl -X POST {{base}}/predictor/feedback/default -H \"Content-Type: application/json\" -d '{\"text\":\"Acquisto cancelleria\",\"label\":\"5555\"}'",
+    "curl {{base}}/predictor/stats/default --output stats.txt",
+    "curl -X GET {{base}}/predictor/download/model/default --output model.pkl",
+    "curl -X GET {{base}}/predictor/download/vectorizer/default --output vectorizer.pkl",
+    "curl -X GET {{base}}/predictor/download/corrections/default --output corrections.json",
+    "curl -X GET {{base}}/predictor/download/labels/default --output labels.json",
+    "curl -X POST {{base}}/pdf/read -H \"accept: application/json\" -H \"Content-Type: multipart/form-data\" -F \"file=@pdf_reader/sample_pdfs/test.pdf\"",
+    "curl -X POST {{base}}/pdf/read -H \"accept: application/json\" -H \"Content-Type: multipart/form-data\" -F \"file=@pdf_reader/sample_pdfs/test_ocr.pdf\"",
+    "curl -X POST {{base}}/pdf/extract/creditcard-transactions -H \"accept: application/json\" -H \"Content-Type: multipart/form-data\" -F \"file=@pdf_reader/sample_pdfs/postfinance-ag-credit-cards-2025-03-28.pdf\""
+    ];
+
+
+    let currentEnv = 'local';
+
+    function updateCommands() {
+      const container = document.getElementById("commands");
+      container.innerHTML = "";
+
+      rawCommands.forEach((cmd, index) => {
+        const replaced = cmd.replace(/{{base}}/g, baseURLs[currentEnv]);
+        parsedCommands[index] = replaced;
+
+        const hasFile = replaced.includes("-F") && replaced.includes("@");
+        const filenameMatch = replaced.match(/@([^";\s]+)/);
+        const filename = filenameMatch ? filenameMatch[1] : null;
+        const simulated = filename && fileSimulations[filename];
+
+        const box = document.createElement("div");
+        box.className = "command-box";
+        box.innerHTML = `
+          <div class="status" id="status-${index}"></div>
+          <pre id="cmd-${index}">${replaced}</pre>
+          ${simulated
+            ? `<button onclick="runCommand(${index}, '${filename}')">Esegui</button>`
+            : hasFile
+              ? `<input type="file" id="file-${index}" /><button onclick="runCommandWithUpload(${index})">Esegui</button>`
+              : `<button onclick="runCommand(${index})">Esegui</button>`}
+          <button onclick="copyCommand(${index})">Copia</button>
+          <div class="output" id="output-${index}"></div>
+        `;
+        container.appendChild(box);
+      });
+    }
+
+    function parseCommand(cmd) {
+      const urlMatch = cmd.match(/(https?:\/\/[^\s"]+)/);
+      const methodMatch = cmd.match(/-X\s+(\w+)/);
+      const method = methodMatch ? methodMatch[1] : "GET";
+      const url = urlMatch ? urlMatch[1] : null;
+      return { method, url };
+    }
+
+    async function runCommand(index, filename = null) {
+      const status = document.getElementById(`status-${index}`);
+      const output = document.getElementById(`output-${index}`);
+      const cmd = document.getElementById(`cmd-${index}`).innerText;
+      const { method, url } = parseCommand(cmd);
+      if (!url) return;
+
+      status.className = "status";
+      output.textContent = "⏳ In esecuzione...";
+
+      try {
+        let options = { method };
+
+        // Estrai -d '...' dal comando se presente
+        const dataMatch = cmd.match(/-d '([^']+)'/);
+        if (dataMatch) {
+            options.headers = { "Content-Type": "application/json" };
+            options.body = dataMatch[1];
+        }
+
+        if (filename && fileSimulations[filename]) {
+          const sim = fileSimulations[filename];
+          const blob = new Blob([sim.content], { type: sim.type });
+          const form = new FormData();
+          form.append("file", blob, filename);
+          options.body = form;
+        }
+
+        const response = await fetch(url, options);
+        const contentType = response.headers.get("content-type") || "";
+        let text = await response.text();
+
+        const isBinary = contentType.includes("application/octet-stream") ||
+                         contentType.includes("application/pdf") ||
+                         (text.length > 1000 && /[^\x09\x0A\x0D\x20-\x7E]/.test(text));
+
+        if (isBinary) {
+          text = "[Risposta binaria ricevuta – non visualizzata]";
+        }
+
+        output.textContent = `Status: ${response.status}\n\n${text}`;
+        status.className = response.ok ? "status success" : "status error";
+      } catch (err) {
+        output.textContent = "Errore: " + err.message;
+        status.className = "status error";
+      }
+    }
+
+    async function runCommandWithUpload(index) {
+      const cmd = parsedCommands[index];
+      const fileInput = document.getElementById(`file-${index}`);
+      const status = document.getElementById(`status-${index}`);
+      const output = document.getElementById(`output-${index}`);
+      const { method, url } = parseCommand(cmd);
+      if (!fileInput.files[0]) {
+        output.textContent = "❌ Seleziona un file da inviare.";
+        return;
+      }
+
+      const form = new FormData();
+      form.append("file", fileInput.files[0]);
+
+      status.className = "status";
+      output.textContent = "⏳ In esecuzione...";
+
+      try {
+        const response = await fetch(url, { method, body: form });
+        const contentType = response.headers.get("content-type") || "";
+        let text = await response.text();
+
+        const isBinary = contentType.includes("application/octet-stream") ||
+                         contentType.includes("application/pdf") ||
+                         (text.length > 1000 && /[^\x09\x0A\x0D\x20-\x7E]/.test(text));
+
+        if (isBinary) {
+          text = "[Risposta binaria ricevuta – non visualizzata]";
+        }
+
+        output.textContent = `Status: ${response.status}\n\n${text}`;
+        status.className = response.ok ? "status success" : "status error";
+      } catch (err) {
+        output.textContent = "Errore: " + err.message;
+        status.className = "status error";
+      }
+    }
+
+    function copyCommand(index) {
+      const cmd = document.getElementById(`cmd-${index}`).innerText;
+      navigator.clipboard.writeText(cmd);
+    }
+
+    document.getElementById("run-all").addEventListener("click", () => {
+      rawCommands.forEach((cmd, i) => {
+        const filenameMatch = cmd.match(/@([^";\s]+)/);
+        const filename = filenameMatch ? filenameMatch[1] : null;
+        if (filename && fileSimulations[filename]) {
+          runCommand(i, filename);
+        } else if (!filename) {
+          runCommand(i);
+        }
+      });
+    });
+
+    document.querySelectorAll('input[name="env"]').forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        currentEnv = e.target.value;
+        updateCommands();
+      });
+    });
+
+    updateCommands();
+  </script>
+</body>
+</html>
